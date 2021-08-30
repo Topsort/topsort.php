@@ -1,0 +1,26 @@
+{
+    "name": "topsort/sdk",
+    "description": "Libray for communicating with Topsort",
+    "keywords": ["promoted", "ads", "marketplace"],
+    "license": "UNLICENSED",
+    "authors": [
+        {
+            "name": "Pablo Reszczynski",
+            "email": "pablo@topsort.com"
+        }
+    ],
+    "type": "project",
+    "require": {
+        "php": ">=7.3",
+        "guzzlehttp/guzzle": "^7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "9.*",
+        "vimeo/psalm": "^4.9"
+    },
+    "autoload": {
+        "psr-4": {
+            "Topsort\\": "src/"
+        }
+    }
+}
