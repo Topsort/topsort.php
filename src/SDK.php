@@ -35,8 +35,10 @@ class SDK {
       $this->marketplace = $marketplace;
       $this->api_key = $api_key;
       $this->client = new Client([
-        'base_uri' => 'https://' . $marketplace . (self::$base_url),
-        'auth' => 'Bearer' . $api_key
+        'base_uri' => 'https://topsort.com',
+        'headers' => [
+            'Authorization' => $api_key,
+        ],
       ]);
    }
 
@@ -45,6 +47,9 @@ class SDK {
     * The winners should be promoted on the website by moving the products up in the results 
     * list or rendering them in a special location on the page.
     *
+    * @param array{'sponsoredListings': int, 'videoAds': int, 'bannerAds': int} $slots
+    * @param array<array{'productId': string, 'quality': string}> $products
+    * @param array{'sessionId': string, 'consumerId': string, 'orderIntentId': string, 'orderId': string} $session
     * @return PromiseInterface
     */
    public function create_auction(array $slots, array $products, array $session): PromiseInterface {
@@ -87,7 +92,7 @@ class SDK {
       );
    }
 
-   private function handleResponse(ResponseInterface $res): array {
+   private function handleResponse(ResponseInterface $res) {
       return json_decode($res->getBody()->getContents());
    }
 
