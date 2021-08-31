@@ -82,10 +82,11 @@ class SDK {
     * id is supplied by the marketplace.
     *
     * @param 'ImpressionEvent'|'ClickEvent'|'PurchaseEvent' $event_type
+    * @param array $data
     */
-   public function create_event(string $event_type): PromiseInterface {
+   public function create_event(string $event_type, array $data): PromiseInterface {
       return $this->client->requestAsync('POST', '/v1/events', [
-         'json' => [ 'eventType' => $event_type ]
+         'json' => array_merge([ 'eventType' => $event_type ], $data)
       ])->then(
          \Closure::fromCallable([$this, 'handleResponse']),
          $this->handleException('Event creation failed')
