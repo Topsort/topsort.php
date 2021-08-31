@@ -7,7 +7,7 @@ dependencies your project needs and installs them into your project.
 ```json
 {
   "require": {
-    "topsort/php-sdk": "master"
+    "topsort/php-sdk": "php@5.6"
   },
   "repositories": [
     {
