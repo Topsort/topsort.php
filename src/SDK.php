@@ -31,11 +31,11 @@ class SDK {
    private $client;
 
 
-   public function __construct(string $marketplace, string $api_key) {
+   public function __construct(string $marketplace, string $api_key, string $url='https://topsort.com') {
       $this->marketplace = $marketplace;
       $this->api_key = $api_key;
       $this->client = new Client([
-        'base_uri' => 'https://stg.api.topsort.com',
+        'base_uri' => $url, 
         'headers' => [
             'Authorization' => $api_key,
         ],
@@ -114,7 +114,9 @@ class SDK {
    */
    private function handleException(string $message) {
       return function(RequestException $err) use ($message) {
-         throw new \Exception($message . ': ' . $err->getMessage());
+         $error_response = $err->getResponse();
+         $error_message = $error_response ? $error_response->getBody()->getContents() : "";
+         throw new \Exception($message . ': ' . $error_message);
       };
    }
 }
