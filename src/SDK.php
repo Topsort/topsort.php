@@ -31,7 +31,12 @@ class SDK {
    private $client;
 
 
-   public function __construct(string $marketplace, string $api_key, string $url='https://topsort.com') {
+   /**
+    * @param string $marketplace
+    * @param string $api_key
+    * @param string $url
+    */
+   public function __construct($marketplace, $api_key, $url='https://topsort.com') {
       $this->marketplace = $marketplace;
       $this->api_key = $api_key;
       $this->client = new Client([
