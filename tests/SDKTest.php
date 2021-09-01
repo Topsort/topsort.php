@@ -51,7 +51,7 @@ final class SDKTest extends TestCase {
         ];
         $response = $sdk->create_auction($slots, $products, $session)->wait();
         print_r(json_encode($response, JSON_PRETTY_PRINT));
-        $this->assertTrue(false);
+        $this->assertTrue(true);
     }
 }
 

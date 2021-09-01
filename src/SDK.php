@@ -35,7 +35,8 @@ class SDK {
       $this->marketplace = $marketplace;
       $this->api_key = $api_key;
       $this->client = new Client([
-        'base_uri' => 'https://topsort.com',
+         'base_uri' => 'localhost:8080',
+        //'base_uri' => 'https://topsort.com',
         'headers' => [
             'Authorization' => $api_key,
         ],
@@ -65,7 +66,7 @@ class SDK {
       return $this->client->requestAsync('POST', '/v1/auctions', [
          'json' => $body
      ])->then(
-       \Closure::fromCallable([$this, 'handleResponse']),
+       $this->handleResponse(),
        $this->handleException('Auction creation failed')
      );
    }
