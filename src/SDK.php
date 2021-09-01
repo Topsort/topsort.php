@@ -35,7 +35,7 @@ class SDK {
       $this->marketplace = $marketplace;
       $this->api_key = $api_key;
       $this->client = new Client([
-        'base_uri' => 'https://staging.topsort.com',
+        'base_uri' => 'https://stg.api.topsort.com',
         'headers' => [
             'Authorization' => $api_key,
         ],
