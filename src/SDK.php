@@ -47,12 +47,16 @@ class SDK {
     * The winners should be promoted on the website by moving the products up in the results 
     * list or rendering them in a special location on the page.
     *
-    * @param array{'sponsoredListings': int, 'videoAds': int, 'bannerAds': int} $slots
-    * @param array<array{'productId': string, 'quality': string}> $products
-    * @param array{'sessionId': string, 'consumerId': string, 'orderIntentId': string, 'orderId': string} $session
+    * @psalm-type Slots=array{sponsoredListings?: int, videoAds?: int, bannerAds?: int}
+    * @psalm-type Product=array{productId: string, quality?: string}
+    * @psalm-type Session=array{sessionId: string, consumerId?: string, orderIntentId?: string, orderId?: string}
+    *
+    * @param Slots $slots
+    * @param array<Product> $products
+    * @param Session $session
     * @return PromiseInterface
     */
-   public function create_auction(array $slots, array $products, array $session): PromiseInterface {
+   public function create_auction(array $slots, array $products, array $session) {
       $body = [
          'slots' => $slots,
          'products' => $products,
@@ -68,10 +72,12 @@ class SDK {
 
    /**
     * Returns an earlier auction result.
+    *
+    * @return PromiseInterface
     */
-   public function get_auction(string $auction_id): PromiseInterface {
+   public function get_auction(string $auction_id) {
       return $this->client->requestAsync('GET', '/v1/auctions' . $auction_id)->then(
-         \Closure::fromCallable([$this, 'handleResponse']),
+         $this->handleResponse(),
          $this->handleException('Failed to get auction')
       );
    }
@@ -83,20 +89,29 @@ class SDK {
     *
     * @param 'ImpressionEvent'|'ClickEvent'|'PurchaseEvent' $event_type
     * @param array $data
+    * @return PromiseInterface
     */
-   public function create_event(string $event_type, array $data): PromiseInterface {
+   public function create_event(string $event_type, array $data) {
       return $this->client->requestAsync('POST', '/v1/events', [
          'json' => array_merge([ 'eventType' => $event_type ], $data)
       ])->then(
-         \Closure::fromCallable([$this, 'handleResponse']),
+         $this->handleResponse(),
          $this->handleException('Event creation failed')
       );
    }
 
-   private function handleResponse(ResponseInterface $res) {
-      return json_decode($res->getBody()->getContents());
+   /**  
+    * @return callable(ResponseInterface): array
+   */
+   private function handleResponse() {
+      return function(ResponseInterface $res) {
+         return json_decode($res->getBody()->getContents());
+      };
    }
 
+   /**  
+    * @return callable(RequestException): void
+   */
    private function handleException(string $message) {
       return function(RequestException $err) use ($message) {
          throw new \Exception($message . ': ' . $err->getMessage());
