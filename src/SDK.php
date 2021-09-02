@@ -41,9 +41,7 @@ class SDK {
       $this->api_key = $api_key;
       $this->client = new Client([
         'base_uri' => $url, 
-        'headers' => [
-            'Authorization' => $api_key,
-        ],
+        'auth' => ['bearer' => $api_key]
       ]);
    }
 
