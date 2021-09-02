@@ -108,7 +108,7 @@ class SDK {
    */
    private function handleResponse() {
       return function(ResponseInterface $res) {
-         return json_decode($res->getBody()->getContents());
+         return json_decode($res->getBody()->getContents(), true);
       };
    }
 
