@@ -41,7 +41,9 @@ class SDK {
       $this->api_key = $api_key;
       $this->client = new Client([
         'base_uri' => $url, 
-        'auth' => ['bearer' => $api_key]
+        'headers' => [
+          'Authorization' => "Bearer {$api_key}"
+        ]
       ]);
    }
 
@@ -118,8 +120,8 @@ class SDK {
    private function handleException(string $message) {
       return function(RequestException $err) use ($message) {
          $error_response = $err->getResponse();
-         $error_message = $error_response ? $error_response->getBody()->getContents() : "";
-         throw new \Exception($message . ': ' . $error_message);
+         $error_message = $error_response ? $error_response->getBody()->getContents() : $err->getMessage();
+         throw new \Exception($message . ': ' . $err->getMessage());
       };
    }
 }
