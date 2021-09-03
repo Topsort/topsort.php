@@ -52,7 +52,7 @@ class SDK {
     * The winners should be promoted on the website by moving the products up in the results 
     * list or rendering them in a special location on the page.
     *
-    * @psalm-type Slots=array{sponsoredListings?: int, videoAds?: int, bannerAds?: int}
+    * @psalm-type Slots=array{listings?: int, videoAds?: int, bannerAds?: int}
     * @psalm-type Product=array{productId: string, quality?: string}
     * @psalm-type Session=array{sessionId: string, consumerId?: string, orderIntentId?: string, orderId?: string}
     *
