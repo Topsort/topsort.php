@@ -100,7 +100,7 @@ class SDK {
     * @param array $data
     * @return PromiseInterface
     */
-   private function create_event(string $event_type, array $data) {
+   private function create_event($event_type, $data) {
       return $this->client->requestAsync('POST', '/v1/events', [
          'json' => array_merge([ 'eventType' => $event_type ], $data)
       ])->then(
@@ -136,7 +136,7 @@ class SDK {
    public function report_purchase($data) {
       return $this->create_event('Purchase', array_merge(
          $data,
-         ['purchasedAt' => $data['purchasedAt']->format('c')]
+         ['purchasedAt' => $data['purchasedAt']->format(\DateTime::RFC3339)]
       ));
    }
 
@@ -150,9 +150,10 @@ class SDK {
    }
 
    /**  
+    * @param string $message
     * @return callable(RequestException): void
    */
-   private function handleException(string $message) {
+   private function handleException($message) {
       return function(RequestException $err) use ($message) {
          $error_response = $err->getResponse();
          $error_message = $error_response ? $error_response->getBody()->getContents() : $err->getMessage();
