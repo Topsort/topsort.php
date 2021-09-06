@@ -19,6 +19,14 @@ use GuzzleHttp\Exception\RequestException;
 *  @author Pablo Reszczynski
 */
 class SDK {
+   /**
+    * Types
+    * @psalm-type Slots=array{listings?: int, videoAds?: int, bannerAds?: int}
+    * @psalm-type Product=array{productId: string, quality?: string}
+    * @psalm-type Session=array{sessionId: string, consumerId?: string, orderIntentId?: string, orderId?: string}
+    * @psalm-type Placement=array{page: string, location: string}
+    * @psalm-type Impression=array{placement: Placement, productId: string, auctionId: string | null, id?: string}
+    */
 
    // TODO: make it work with staging or demo envs
    /** @var string */
@@ -51,10 +59,6 @@ class SDK {
     * Creates an auction between products for promotion slots. The winners are returned. 
     * The winners should be promoted on the website by moving the products up in the results 
     * list or rendering them in a special location on the page.
-    *
-    * @psalm-type Slots=array{listings?: int, videoAds?: int, bannerAds?: int}
-    * @psalm-type Product=array{productId: string, quality?: string}
-    * @psalm-type Session=array{sessionId: string, consumerId?: string, orderIntentId?: string, orderId?: string}
     *
     * @param Slots $slots
     * @param array<Product> $products
@@ -92,17 +96,45 @@ class SDK {
     * or PurchaseEvent. All event types have an eventType field and an id field. 
     * id is supplied by the marketplace.
     *
-    * @param 'ImpressionEvent'|'ClickEvent'|'PurchaseEvent' $event_type
+    * @param 'Impression'|'ClickEvent'|'Purchase' $event_type
     * @param array $data
     * @return PromiseInterface
     */
-   public function create_event(string $event_type, array $data) {
+   private function create_event(string $event_type, array $data) {
       return $this->client->requestAsync('POST', '/v1/events', [
          'json' => array_merge([ 'eventType' => $event_type ], $data)
       ])->then(
          $this->handleResponse(),
          $this->handleException('Event creation failed')
       );
+   }
+
+   /**
+    * @psalm-type ClickData=array{session: Session, placement: Placement, productId: string, auctionId: string, id?: string}
+    * @param ClickData $data
+    * @return PromiseInterface
+    */
+   public function reportClick($data) {
+      return $this->create_event('ClickEvent', $data);
+   }
+
+   /**
+    * @psalm-type ImpressionData=array{session: Session, impressions: array<Impression>}
+    * @param ImpressionData $data
+    * @return PromiseInterface
+    */
+   public function reportImpressions($data) {
+      return $this->create_event('Impression', $data);
+   }
+
+   /**
+    * @psalm-type PurchaseItem=array{productId: string, auctionId?: string, quantity?: int, unitPrice: int}
+    * @psalm-type PurchaseData=array{session: Session, id: string, purchasedAt: \DateTime, items: array<PurchaseItem>}
+    * @param PurchaseData $data
+    * @return PromiseInterface
+    */
+   public function reportPurchase($data) {
+      return $this->create_event('Purchase', $data);
    }
 
    /**  
