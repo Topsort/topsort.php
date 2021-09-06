@@ -134,7 +134,10 @@ class SDK {
     * @return PromiseInterface
     */
    public function report_purchase($data) {
-      return $this->create_event('Purchase', $data);
+      return $this->create_event('Purchase', array_merge(
+         $data,
+         ['purchasedAt' => $data['purchasedAt']->format('c')]
+      ));
    }
 
    /**  
