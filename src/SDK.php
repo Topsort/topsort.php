@@ -45,6 +45,11 @@ class SDK {
     * @param string $url
     */
    public function __construct($marketplace, $api_key, $url='https://topsort.com') {
+      assert(!is_null($api_key), 'API key is missing');
+      assert(isset($api_key) && $api_key == '', 'API key is empty');
+      assert(!is_null($url), 'URL is null');
+      assert(isset($url) && $url == '', 'URL is empty');
+
       $this->marketplace = $marketplace;
       $this->api_key = $api_key;
       $this->client = new Client([
