@@ -114,7 +114,7 @@ class SDK {
     * @param ClickData $data
     * @return PromiseInterface
     */
-   public function reportClick($data) {
+   public function report_click($data) {
       return $this->create_event('ClickEvent', $data);
    }
 
@@ -123,7 +123,7 @@ class SDK {
     * @param ImpressionData $data
     * @return PromiseInterface
     */
-   public function reportImpressions($data) {
+   public function report_impressions($data) {
       return $this->create_event('Impression', $data);
    }
 
@@ -133,7 +133,7 @@ class SDK {
     * @param PurchaseData $data
     * @return PromiseInterface
     */
-   public function reportPurchase($data) {
+   public function report_purchase($data) {
       return $this->create_event('Purchase', $data);
    }
 
