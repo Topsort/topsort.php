@@ -156,7 +156,9 @@ class SDK {
    private function handleException($message) {
       return function(RequestException $err) use ($message) {
          $error_response = $err->getResponse();
-         $error_message = $error_response ? $error_response->getBody()->getContents() : $err->getMessage();
+         $error_message = ($error_response && $error_response != '') 
+            ? $error_response->getBody()->getContents() 
+            : $err->getMessage();
          throw new \Exception($message . ': ' . $error_message);
       };
    }
