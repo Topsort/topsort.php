@@ -96,7 +96,7 @@ class SDK {
     * or PurchaseEvent. All event types have an eventType field and an id field. 
     * id is supplied by the marketplace.
     *
-    * @param 'Impression'|'ClickEvent'|'Purchase' $event_type
+    * @param 'Impression'|'Click'|'Purchase' $event_type
     * @param array $data
     * @return PromiseInterface
     */
@@ -115,7 +115,7 @@ class SDK {
     * @return PromiseInterface
     */
    public function report_click($data) {
-      return $this->create_event('ClickEvent', $data);
+      return $this->create_event('Click', $data);
    }
 
    /**
