@@ -158,8 +158,8 @@ class SDK {
          $error_response = $err->getResponse();
          $error_response_content = $error_response && $error_response->getBody()->getContents();
          $error_message = ($error_response_content && $error_response_content != '') 
-            ? $error_response_content
-            : $err->getMessage();
+            ? 'Content: ' . $error_response_content
+            : 'Message:' . $err->getMessage();
          throw new TopsortException($message . ": " . $error_message, 0, $err);
       };
    }
