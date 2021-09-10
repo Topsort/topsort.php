@@ -156,10 +156,31 @@ class SDK {
    private function handleException($message) {
       return function(RequestException $err) use ($message) {
          $error_response = $err->getResponse();
-         $error_message = ($error_response && $error_response != '') 
-            ? $error_response->getBody()->getContents() 
+         $error_response_content = $error_response && $error_response->getBody()->getContents();
+         $error_message = ($error_response_content && $error_response_content != '') 
+            ? $error_response_content
             : $err->getMessage();
-         throw new \Exception($message . ': ' . $error_message);
+         throw new TopsortException($message . ": " . $error_message, 0, $err);
       };
+   }
+}
+
+class TopsortException extends \Exception {
+   /**
+    * @param string $message
+    * @param int $code
+    * @param \Throwable $previous
+    */
+   public function __construct($message, $code=0, $previous=null) {
+      parent::__construct($message, $code, $previous);
+   }
+
+   /**
+    * @return \string
+    */
+   public function __toString() {
+      $previous = $this->getPrevious();
+      $previous_message = $previous ? $previous->getMessage() : '';
+      return __CLASS__ . " {$this->message}: {$previous_message}";
    }
 }
