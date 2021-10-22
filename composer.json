@@ -2,7 +2,7 @@
     "name": "topsort/sdk",
     "description": "Libray for communicating with Topsort",
     "keywords": ["promoted", "ads", "marketplace"],
-    "license": "UNLICENSED",
+    "license": "MIT",
     "authors": [
         {
             "name": "Pablo Reszczynski",
