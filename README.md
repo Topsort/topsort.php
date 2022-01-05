@@ -1,9 +1,3 @@
----
-mainfont: Source Sans Pro
-monofont: Source Code Pro
-monofontoptions: 'Scale=0.7'
----
-
 # Topsort Promoted Listings SDK for PHP
 
 A PHP Software Development Kit for Topsort Promoted Listings API.
