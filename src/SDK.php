@@ -1,4 +1,4 @@
-<?php 
+<?php
 declare(strict_types=1);
 namespace Topsort;
 
@@ -48,7 +48,7 @@ class SDK {
       $this->marketplace = $marketplace;
       $this->api_key = $api_key;
       $this->client = new Client([
-        'base_uri' => $url, 
+        'base_uri' => $url,
         'headers' => [
           'Authorization' => "Bearer {$api_key}"
         ]
@@ -56,8 +56,8 @@ class SDK {
    }
 
    /**
-    * Creates an auction between products for promotion slots. The winners are returned. 
-    * The winners should be promoted on the website by moving the products up in the results 
+    * Creates an auction between products for promotion slots. The winners are returned.
+    * The winners should be promoted on the website by moving the products up in the results
     * list or rendering them in a special location on the page.
     *
     * @param Slots $slots
@@ -92,8 +92,8 @@ class SDK {
    }
 
    /**
-    * All events are described by a single JSON object, an ImpressionEvent, ClickEvent 
-    * or PurchaseEvent. All event types have an eventType field and an id field. 
+    * All events are described by a single JSON object, an ImpressionEvent, ClickEvent
+    * or PurchaseEvent. All event types have an eventType field and an id field.
     * id is supplied by the marketplace.
     *
     * @param 'Impression'|'Click'|'Purchase' $event_type
@@ -140,7 +140,7 @@ class SDK {
       ));
    }
 
-   /**  
+   /**
     * @return callable(ResponseInterface): array
    */
    private function handleResponse() {
@@ -149,7 +149,7 @@ class SDK {
       };
    }
 
-   /**  
+   /**
     * @param string $message
     * @return callable(RequestException): void
    */
@@ -157,7 +157,7 @@ class SDK {
       return function(RequestException $err) use ($message) {
          $error_response = $err->getResponse();
          $error_response_content = $error_response && $error_response->getBody()->getContents();
-         $error_message = ($error_response_content && $error_response_content != '') 
+         $error_message = ($error_response_content && $error_response_content != '')
             ? 'Content: ' . $error_response_content
             : 'Message:' . $err->getMessage();
          throw new TopsortException($message . ": " . $error_message, 0, $err);
