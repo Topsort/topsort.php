@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 final class SDKTest extends TestCase {
     public function testAuction(): void {
         // my localhost engine
-        $sdk = new SDK('babytuto', '6f62f7fd-8c6f-40f2-aa6e-10649638b2f9');
+        $sdk = new SDK('my_marketplace', '6f62f7fd-8c6f-40f2-aa6e-10649638b2f9');
         $slots = [
             'sponsoredListings' => 1,
         ];

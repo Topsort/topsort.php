@@ -9,6 +9,8 @@ use GuzzleHttp\Promise\Promise;
 use GuzzleHttp\Promise\PromiseInterface;
 use Psr\Http\Message\ResponseInterface;
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\TransferException;
 
 /**
 *  A sample class
@@ -44,7 +46,7 @@ class SDK {
     * @param string $api_key
     * @param string $url
     */
-   public function __construct($marketplace, $api_key, $url='https://topsort.com') {
+   public function __construct(string $marketplace, string $api_key, $url='https://topsort.com') {
       $this->marketplace = $marketplace;
       $this->api_key = $api_key;
       $this->client = new Client([
@@ -100,7 +102,7 @@ class SDK {
     * @param array $data
     * @return PromiseInterface
     */
-   private function create_event($event_type, $data) {
+   private function create_event(string $event_type, array $data) {
       return $this->client->requestAsync('POST', '/v1/events', [
          'json' => array_merge([ 'eventType' => $event_type ], $data)
       ])->then(
@@ -114,7 +116,7 @@ class SDK {
     * @param ClickData $data
     * @return PromiseInterface
     */
-   public function report_click($data) {
+   public function report_click(array $data) {
       return $this->create_event('Click', $data);
    }
 
@@ -123,7 +125,7 @@ class SDK {
     * @param ImpressionData $data
     * @return PromiseInterface
     */
-   public function report_impressions($data) {
+   public function report_impressions(array $data) {
       return $this->create_event('Impression', $data);
    }
 
@@ -133,7 +135,7 @@ class SDK {
     * @param PurchaseData $data
     * @return PromiseInterface
     */
-   public function report_purchase($data) {
+   public function report_purchase(array $data) {
       return $this->create_event('Purchase', array_merge(
          $data,
          ['purchasedAt' => $data['purchasedAt']->format(\DateTime::RFC3339)]
@@ -151,16 +153,21 @@ class SDK {
 
    /**
     * @param string $message
-    * @return callable(RequestException): void
+    * @return callable(TransferException): void
    */
-   private function handleException($message) {
-      return function(RequestException $err) use ($message) {
-         $error_response = $err->getResponse();
-         $error_response_content = $error_response && $error_response->getBody()->getContents();
-         $error_message = ($error_response_content && $error_response_content != '')
+   private function handleException(string $message) {
+      return function(TransferException $err) use ($message) {
+         if ($err instanceof RequestException) {
+             $error_response = $err->getResponse();
+             $error_response_content = $error_response && $error_response->getBody()->getContents();
+             $error_message = ($error_response_content && $error_response_content != '')
             ? 'Content: ' . $error_response_content
             : 'Message:' . $err->getMessage();
-         throw new TopsortException($message . ": " . $error_message, 0, $err);
+             throw new TopsortException($message . ": " . $error_message, 0, $err);
+         } else if ($err instanceof ConnectException) {
+            $url = $err->getRequest()->getUri();
+            throw new TopsortException($message . ": Could not connect to " . $url, 0, $err);
+         }
       };
    }
 }
@@ -171,7 +178,7 @@ class TopsortException extends \Exception {
     * @param int $code
     * @param \Throwable $previous
     */
-   public function __construct($message, $code=0, $previous=null) {
+   public function __construct(string $message, int $code=0, \Throwable $previous=null) {
       parent::__construct($message, $code, $previous);
    }
 
