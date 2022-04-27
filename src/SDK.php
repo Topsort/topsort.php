@@ -57,22 +57,26 @@ class SDK {
       ]);
    }
 
-   /**
-    * Creates an auction between products for promotion slots. The winners are returned.
-    * The winners should be promoted on the website by moving the products up in the results
-    * list or rendering them in a special location on the page.
-    *
-    * @param Slots $slots
-    * @param array<Product> $products
-    * @param Session $session
-    * @return PromiseInterface
-    */
-   public function create_auction(array $slots, array $products, array $session) {
+    /**
+     * Creates an auction between products for promotion slots. The winners are returned.
+     * The winners should be promoted on the website by moving the products up in the results
+     * list or rendering them in a special location on the page.
+     *
+     * @param Slots $slots
+     * @param array<Product> $products
+     * @param Session $session
+     * @param array|null $bannerOptions
+     * @return PromiseInterface
+     */
+   public function create_auction(array $slots, array $products, array $session, array $bannerOptions = null) {
       $body = [
          'slots' => $slots,
          'products' => $products,
          'session' => $session,
       ];
+      if ($bannerOptions !== null) {
+          $body['bannerOptions'] = $bannerOptions;
+      }
       return $this->client->requestAsync('POST', '/v1/auctions', [
          'json' => $body
      ])->then(
@@ -141,6 +145,17 @@ class SDK {
          ['purchasedAt' => $data['purchasedAt']->format(\DateTime::RFC3339)]
       ));
    }
+
+    /**
+     * @return PromiseInterface
+     */
+    public function get_ad_locations()
+    {
+        return $this->client->requestAsync('GET', '/api/v1/ad_locations')->then(
+            $this->handleResponse(),
+            $this->handleException('Failed to get ad locations')
+        );
+    }
 
    /**
     * @return callable(ResponseInterface): array
