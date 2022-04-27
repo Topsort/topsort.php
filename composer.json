@@ -1,6 +1,6 @@
 {
     "name": "topsort/sdk",
-    "description": "Libray for communicating with Topsort",
+    "description": "Library for communicating with Topsort",
     "keywords": ["promoted", "ads", "marketplace"],
     "license": "MIT",
     "version": "1.0.1",
