@@ -11,14 +11,14 @@ dependencies your project needs and installs them into your project.
 ```json
 {
   "require": {
-    "topsort/php-sdk": "1.0.0"
+    "topsort/sdk": "1.0.0"
   }
 }
 ```
 
 Or with the command line:
 ```bash
-composer require topsort/php-sdk
+composer require topsort/sdk
 ```
 
 ## How it works
