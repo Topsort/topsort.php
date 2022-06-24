@@ -12,6 +12,8 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\TransferException;
 
+define("TOPSORT_SDK_VERSION", "v1.1.1")
+
 /**
 *  A sample class
 *
@@ -52,7 +54,8 @@ class SDK {
       $this->client = new Client([
         'base_uri' => $url,
         'headers' => [
-          'Authorization' => "Bearer {$api_key}"
+          'Authorization' => "Bearer {$api_key}",
+          'User-Agent' => "Topsort/PHP-SDK {TOPSORT_SDK_VERSION}"
         ]
       ]);
    }
