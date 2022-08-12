@@ -12,7 +12,7 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\TransferException;
 
-define("TOPSORT_SDK_VERSION", "v1.1.1");
+define("TOPSORT_SDK_VERSION", "v2.2.1");
 
 /**
 *  A sample class
@@ -30,6 +30,7 @@ class SDK {
     * @psalm-type Session=array{sessionId: string, consumerId?: string, orderIntentId?: string, orderId?: string}
     * @psalm-type Placement=array{page: string, location: string}
     * @psalm-type Impression=array{placement: Placement, productId: string, auctionId: string | null, id?: string}
+    * @psalm-type BannerOptions=array{slots: int, aspectRatio: string, category?: string, searchQuery?: string, device?: string}
     */
 
    // TODO: make it work with staging or demo envs
@@ -78,10 +79,34 @@ class SDK {
          'session' => $session,
       ];
       if ($bannerOptions !== null) {
-          $body['bannerOptions'] = $bannerOptions;
+        trigger_error('Deprecation: use create_banner_auction instead', E_USER_NOTICE);
       }
       return $this->client->requestAsync('POST', '/v1/auctions', [
          'json' => $body
+     ])->then(
+       $this->handleResponse(),
+       $this->handleException('Auction creation failed')
+     );
+   }
+
+   /**
+    *  Creates a banner auction
+    *
+    *  @param int $slots
+    *  @param BannerOptions $bannerOptions
+    *  @return PromiseInterface
+    */
+   public function create_banner_auction(array $bannerOptions) {
+     $auction = array_merge([
+       'type' => 'banners',
+     ], $bannerOptions);
+     $body = [
+       'auctions' => [
+         $auction
+       ]
+     ];
+     return $this->client->requestAsync('POST', '/v2/auctions', [
+       'json' => $body
      ])->then(
        $this->handleResponse(),
        $this->handleException('Auction creation failed')
@@ -154,10 +179,8 @@ class SDK {
      */
     public function get_ad_locations()
     {
-        return $this->client->requestAsync('GET', '/api/v1/ad_locations')->then(
-            $this->handleResponse(),
-            $this->handleException('Failed to get ad locations')
-        );
+        trigger_error("Deprecated", E_USER_NOTICE);
+        return new Promise();
     }
 
    /**
