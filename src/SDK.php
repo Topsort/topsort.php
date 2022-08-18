@@ -190,7 +190,7 @@ class SDK
      */
     public function get_ad_locations()
     {
-        return $this->client->requestAsync('GET', '/api/v1/ad_config')->then(
+        return $this->client->requestAsync('GET', '/api/v1/ad_configs')->then(
             function (object $res) {
                 $body = $res->getBody()->getContents();
                 return [
