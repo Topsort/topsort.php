@@ -14,7 +14,7 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\TransferException;
 
-define("TOPSORT_SDK_VERSION", "v1.2.3");
+define('TOPSORT_SDK_VERSION', 'v1.2.3');
 
 /**
 *  A sample class
@@ -192,9 +192,9 @@ class SDK
     {
         return $this->client->requestAsync('GET', '/api/v1/ad_configs')->then(
             function (object $res) {
-                $body = $res->getBody()->getContents();
+                $body = json_decode($res->getBody()->getContents());
                 return [
-                  "bannerAds" => array_map('Topsort\SDK::transform_ad_config', $body["bannerAds"]),
+                  'bannerAds' => array_map('Topsort\SDK::transform_ad_config', $body['bannerAds']),
                ];
             },
             $this->handleException('Failed to get Ad Locations')
@@ -204,10 +204,10 @@ class SDK
     private static function transform_ad_config(array $adConfig): array
     {
         return [
-                "dimensions" => $adConfig["dimensions"][0]["size"],
-                "aspectRatio" => $adConfig["dimensions"][0]["aspectRatio"],
-                "placement" => [
-                  "page" => SDK::get_placement_page($adConfig["position"]),
+                'dimensions' => $adConfig['dimensions'][0]['size'],
+                'aspectRatio' => $adConfig['dimensions'][0]['aspectRatio'],
+                'placement' => [
+                  'page' => SDK::get_placement_page($adConfig['position']),
                 ],
                ];
     }
@@ -215,14 +215,14 @@ class SDK
     private static function get_placement_page(string $position): string
     {
         switch ($position) {
-            case "search":
-                return "Search";
-            case "category":
-                return "Category";
-            case "home":
-                return "Home-Page";
+            case 'search':
+                return 'Search';
+            case 'category':
+                return 'Category';
+            case 'home':
+                return 'Home-Page';
             default:
-                return "Home-Page";
+                return 'Home-Page';
         }
     }
 
@@ -249,10 +249,10 @@ class SDK
                 $error_message = ($error_response_content && $error_response_content != '')
             ? 'Content: ' . $error_response_content
             : 'Message:' . $err->getMessage();
-                throw new TopsortException($message . ": " . $error_message, 0, $err);
+                throw new TopsortException($message . ': ' . $error_message, 0, $err);
             } elseif ($err instanceof ConnectException) {
                 $url = $err->getRequest()->getUri();
-                throw new TopsortException($message . ": Could not connect to " . $url, 0, $err);
+                throw new TopsortException($message . ': Could not connect to ' . $url, 0, $err);
             }
         };
     }
