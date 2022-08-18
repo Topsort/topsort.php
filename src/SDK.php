@@ -192,7 +192,7 @@ class SDK
     {
         return $this->client->requestAsync('GET', '/api/v1/ad_configs')->then(
             function (object $res) {
-                $body = json_decode($res->getBody()->getContents());
+                $body = json_decode($res->getBody()->getContents(), true);
                 return [
                   'bannerAds' => array_map('Topsort\SDK::transform_ad_config', $body['bannerAds']),
                ];
