@@ -1,4 +1,4 @@
-<?php 
+<?php
 declare(strict_types=1);
 namespace Topsort;
 
@@ -48,7 +48,7 @@ class SDK {
       $this->marketplace = $marketplace;
       $this->api_key = $api_key;
       $this->client = new Client([
-        'base_uri' => $url, 
+        'base_uri' => $url,
         'headers' => [
           'Authorization' => "Bearer {$api_key}"
         ]
@@ -56,8 +56,8 @@ class SDK {
    }
 
    /**
-    * Creates an auction between products for promotion slots. The winners are returned. 
-    * The winners should be promoted on the website by moving the products up in the results 
+    * Creates an auction between products for promotion slots. The winners are returned.
+    * The winners should be promoted on the website by moving the products up in the results
     * list or rendering them in a special location on the page.
     *
     * @param Slots $slots
@@ -68,7 +68,7 @@ class SDK {
    public function create_auction(array $slots, array $products, array $session) {
       $body = [
          'slots' => $slots,
-         'products' => $products,
+         'products' => array_values($products),
          'session' => $session,
       ];
       return $this->client->requestAsync('POST', '/v1/auctions', [
@@ -92,8 +92,8 @@ class SDK {
    }
 
    /**
-    * All events are described by a single JSON object, an ImpressionEvent, ClickEvent 
-    * or PurchaseEvent. All event types have an eventType field and an id field. 
+    * All events are described by a single JSON object, an ImpressionEvent, ClickEvent
+    * or PurchaseEvent. All event types have an eventType field and an id field.
     * id is supplied by the marketplace.
     *
     * @param 'Impression'|'Click'|'Purchase' $event_type
@@ -124,7 +124,11 @@ class SDK {
     * @return PromiseInterface
     */
    public function report_impressions($data) {
-      return $this->create_event('Impression', $data);
+      $event = [
+        'session' => $data['session'],
+        'impressions' => array_values($data['impressions']),
+      ];
+      return $this->create_event('Impression', $event);
    }
 
    /**
@@ -134,13 +138,16 @@ class SDK {
     * @return PromiseInterface
     */
    public function report_purchase($data) {
-      return $this->create_event('Purchase', array_merge(
-         $data,
-         ['purchasedAt' => $data['purchasedAt']->format(\DateTime::RFC3339)]
-      ));
+      $event = [
+        'session' => $data['session'],
+        'id' => $data['id'],
+        'purchasedAt' => $data['purchasedAt']->format(\DateTime::RFC3339),
+        'items' => array_values($data['items'])
+      ];
+      return $this->create_event('Purchase', $event);
    }
 
-   /**  
+   /**
     * @return callable(ResponseInterface): array
    */
    private function handleResponse() {
@@ -149,7 +156,7 @@ class SDK {
       };
    }
 
-   /**  
+   /**
     * @param string $message
     * @return callable(RequestException): void
    */
@@ -157,7 +164,7 @@ class SDK {
       return function(RequestException $err) use ($message) {
          $error_response = $err->getResponse();
          $error_response_content = $error_response && $error_response->getBody()->getContents();
-         $error_message = ($error_response_content && $error_response_content != '') 
+         $error_message = ($error_response_content && $error_response_content != '')
             ? 'Content: ' . $error_response_content
             : 'Message:' . $err->getMessage();
          throw new TopsortException($message . ": " . $error_message, 0, $err);
