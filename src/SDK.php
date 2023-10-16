@@ -53,7 +53,7 @@ class SDK
         'base_uri' => "https://api.topsort.com",
         'headers' => [
           'Authorization' => "Bearer {$api_key}",
-          'User-Agent' => "Topsort/PHP-SDK {TOPSORT_SDK_VERSION}"
+          'User-Agent' => "Topsort/PHP-SDK {TOPSORT_SDK_VERSION}",
           'X-User-Agent' => "Topsort/PHP-SDK {TOPSORT_SDK_VERSION}"
         ]
       ]);
@@ -134,21 +134,20 @@ class SDK
      * id is supplied by the marketplace.
      *
      * @param 'impression'|'click'|'purchase' $event_type
-     * @param array<Impression|Click|Purchase> $data
-     * @return PromiseInterface
+     * @param Impression|Click|Purchase $data
+     * @return PromiseInterface | null
      */
     private function create_event(string $event_type, array $data)
     {
-        if (!$data["ocurredAt"]) {
-            $data["ocurredAt"] = (new \DateTime())
+        if (!isset($data["ocurredAt"])) {
+            $data["ocurredAt"] = new \DateTime();
         }
-        if (!$data["id"]) {
+        if (!isset($data["id"])) {
             $data["id"] = uniqid();
         }
-        if (!$data["opaqueUserId"]) {
+        if (!isset($data["opaqueUserId"])) {
             $data["opaqueUserId"] = $this->getOpaqueUserId();
         }
-        $data["ocurredAt"] = $data["ocurredAt"]->format(\DateTime::RFC3339);
 
         if (strtolower($event_type) === 'impression') {
           $payload = [
@@ -163,8 +162,7 @@ class SDK
             'purchases' => [$data],
           ];
         } else {
-          $this->handleException('Invalid event type: {$event_type}')(new \Exception('Invalid event type'));
-          return;
+          throw new \Exception('Invalid event type: {$event_type}');
         }
         return $this->client->requestAsync('POST', '/v2/events', [
          'json' => $payload
@@ -176,7 +174,7 @@ class SDK
 
     /**
      * @param Click $data
-     * @return PromiseInterface
+     * @return PromiseInterface | null
      */
     public function report_click(array $data)
     {
@@ -184,9 +182,8 @@ class SDK
     }
 
     /**
-     * @psalm-type ImpressionData=array{session: Session, impressions: array<Impression>}
-     * @param ImpressionData $data
-     * @return PromiseInterface
+     * @param Impression $data
+     * @return PromiseInterface | null
      */
     public function report_impressions(array $data)
     {
@@ -194,17 +191,12 @@ class SDK
     }
 
     /**
-     * @psalm-type PurchaseItem=array{productId: string, auctionId?: string, quantity?: int, unitPrice: int}
-     * @psalm-type PurchaseData=array{session: Session, id: string, purchasedAt: \DateTime, items: array<PurchaseItem>}
-     * @param PurchaseData $data
-     * @return PromiseInterface
+     * @param Purchase $data
+     * @return PromiseInterface | null
      */
     public function report_purchase(array $data)
     {
-        return $this->create_event('purchase', array_merge(
-            $data,
-            ['purchasedAt' => $data['purchasedAt']->format(\DateTime::RFC3339)]
-        ));
+        return $this->create_event('purchase', $data);
     }
 
     /**
