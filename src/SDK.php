@@ -54,6 +54,7 @@ class SDK
         'headers' => [
           'Authorization' => "Bearer {$api_key}",
           'User-Agent' => "Topsort/PHP-SDK {TOPSORT_SDK_VERSION}"
+          'X-User-Agent' => "Topsort/PHP-SDK {TOPSORT_SDK_VERSION}"
         ]
       ]);
     }
