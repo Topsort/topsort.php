@@ -11,7 +11,7 @@ dependencies your project needs and installs them into your project.
 ```json
 {
   "require": {
-    "topsort/sdk": "1.0.0"
+    "topsort/sdk": "3.0.0"
   }
 }
 ```
@@ -37,47 +37,37 @@ so all methods maps directly to the API description.
 <?php
 use Topsort\SDK;
 
-$topsort_client = new SDK('my_marketplace', 'my_api_key');
+$topsort_client = new SDK("my_api_key");
 
-// An array of objects, each describing a product that should participate in
+// An array of product IDs, each describing a product that should participate in
 // the auction.
 $products = [
   [
-    "productId" => "i8bfHPJaxcAb3",
-    "quality" => "0.5"
-  ],
-  [
-    "productId" => "gDG0HV97ed2s",
-    "quality" => "0.6"
+    "i8bfHPJaxcAb3",
+    "gDG0HV97ed2s",
   ]
 ];
 
-// Identifiers describing the consumer's session on the e-commerce site.
-$session = [
-  "sessionId" => "igwq0hEGZ8W56"
-];
-
-// The Slots object specifies how many auctions winners should be returned for
-// each promotion type. The promotion types depend on the marketplace configuration.
-// "listings", "videoAds" and "bannerAds" are common.
-$slots = [
-  "listings" => 1
-];
+// The Slots number specifies how many auctions winners should be returned for
+// the auction.
+$slots = 1;
 
 // Run an auction.
-$auction_result = $topsort_client->auction($slots, $products, $session)->wait();
+$auction_result = $topsort_client->auction($slots, $products)->wait();
 
 // => [
-// "slots" => [
-//   "listings" => [
-//     "auctionId": "AKFU78",
-//     "winners": [
-//       [
-//         "rank" => 0,
-//         "productId" => "gDG0HV97ed2s"
-//       ]
-//     ]
-//   ]
+// "results" => [
+//    [
+//      "resultType" => "listings",
+//      "winners" => [
+//         [
+//            "rank" => 1,
+//            "type" => "product",
+//            "id" => "gDG0HV97ed2s",
+//            "resovedBidId" => "AKFU78"
+//         ]
+//      ]
+//    ]
 //  ]
 //]
 ```
@@ -88,36 +78,29 @@ Tracks whenever a product, promoted or not, had a click.
 
 `Topsort\SDK\SDK::report_click` requires one argument, an array with the following keys:
 
-- session (**required**): An array describing the user on the current session.
-- placement (**required**): An array describing where the click happened
-- productId (**required**): The product that was clicked.
-- auctionId: Required for promoted products. Must be the ID for the auction the product won.
+- entity: Required for unpromoted products. Must be the ID for the product that was clicked.
+- resolvedBidId: Required for promoted products. Must be the ID for the auction the product won.
+- placement: Optional. An array describing the placement of the product on the site.
+- id: Optional. The marketplace's ID for the event. If present, it should be unique. Topsort may use this field to de-duplicate events.
+- opaqueUserId: Optional. The marketplace's ID for the user. Defaults to a random UUID stored in a cookie.
+- ocurredAt: Optional. A DateTime, from when the click happened. Defaults to the current time.
 
 ```php
 <?php
 
 use Topsort\SDK;
 
-$topsort_client = new SDK('my_marketplace', 'my_api_key');
-
-// session
-$session = [
-  "sessionId" => "igwq0hEGZ8W56"
-];
+$topsort_client = new SDK('my_api_key');
 
 $placement = [
   // A marketplace assigned name for a page.
-  "page" => "/categories/shoes",
-  // A marketplace defined name for a page part.
-  "location" => "position_1"
+  "path" => "/categories/shoes",
 ];
 
 // Report the click
 $topsort_client->report_click([
-  "session" => $session,
   "placement" => $placement,
-  "productId" => "gDG0HV97ed2s",
-  "auctionId" => "AKFU78"
+  "resolvedBidId" => "AKFU78",
 ]);
 ```
 
@@ -127,9 +110,12 @@ rendered on the site.
 
 `Topsort\SDK\SDK::report_impressions` requires one argument, an array with the following keys:
 
-- session (**required**): An array describing the user on the current session.
-- id: The marketplace's ID for the event. If present, it should be unique. Topsort may use this field to de-duplicate events. Also useful for correlating marketplace and Topsort events.
-- impressions (**required**): An array of impression arrays, each containg data from the product rendered
+- entity: Required for unpromoted products. Must be the ID for the product that was rendered.
+- resolvedBidId: Required for promoted products. Must be the ID for the auction the product won.
+- placement: Optional. An array describing the placement of the product on the site.
+- id: Optional. The marketplace's ID for the event. If present, it should be unique. Topsort may use this field to de-duplicate events.
+- opaqueUserId: Optional. The marketplace's ID for the user. Defaults to a random UUID stored in a cookie.
+- ocurredAt: Optional. A DateTime, from when the impression happened. Defaults to the current time.
 
 ```php
 <?php
@@ -138,33 +124,15 @@ use Topsort\SDK;
 
 $topsort_client = new SDK('my_marketplace', 'my_api_key');
 
-$session = [
-  "sessionId" => "igwq0hEGZ8W56"
-];
-
-$impressions = [
-  [
-    "placement" => [
-      "page" => "/categories/shoes",
-      "location" => "position_1"
-    ],
-    "productId" => "gDG0HV97ed2s",
-    "auctionId" => "AKFU78",
+$impression = [
+  "placement" => [
+    "path" => "/categories/shoes",
   ],
-  [
-    "placement" => [
-      "page" => "/categories/shoes",
-      "location" => "position_2"
-    ],
-    "productId" => "i8bfHPJaxcAb3"
-  ]
+  "resolvedBidId" => "AKFU78",
 ];
 
 // Report the impressions
-$topsort_client->report_impression([
-  "session" => $session,
-  "impressions" => $impressions
-]);
+$topsort_client->report_impression($impression);
 ```
 
 ## Usage: Reporting purchases events
@@ -172,36 +140,28 @@ $topsort_client->report_impression([
 
 `Topsort\SDK\SDK::report_purchase` requires one argument, an array with the following keys:
 
-- session (**required**): An array describing the user on the current session.
-- purchasedAt (**required**): A DateTime, from when the purchase happened.
-- currency: (**required**): The currency used in the purchase.
-- items: (**required**): An array of product data.
+- items: An array of product data.
+- opaqueUserId: Optional. The marketplace's ID for the user. Defaults to a random UUID stored in a cookie.
+- ocurredAt: Optional. A DateTime, from when the purchase happened. Defaults to the current time.
 
 ```php
 <?php
 
 use Topsort\SDK;
 
-$topsort_client = new SDK('my_marketplace', 'my_api_key');
-
-$session = [
-  "sessionId" => "igwq0hEGZ8W56"
-];
+$topsort_client = new SDK('my_api_key');
 
 $items = [
   [
     "productId" => "gDG0HV97ed2s",
-    "auctionId" => "AKFU78",
     "quantity" => 2,
-    "unitPrice" => 10000
+    "unitPrice" => 10000,
   ]
 ];
 
 // Report the purchase
 $topsort_client->report_purchase([
-  "session" => $session,
-  "purchasedAt" => new DateTime(),
-  "currency" => "USD",
-  "items" => $items
+  "ocurredAt" => new DateTime(),
+  "items" => $items,
 ]);
 ```
