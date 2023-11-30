@@ -42,10 +42,8 @@ $topsort_client = new SDK("my_api_key");
 // An array of product IDs, each describing a product that should participate in
 // the auction.
 $products = [
-  [
     "i8bfHPJaxcAb3",
-    "gDG0HV97ed2s",
-  ]
+    "gDG0HV97ed2s"
 ];
 
 // The Slots number specifies how many auctions winners should be returned for
@@ -53,7 +51,7 @@ $products = [
 $slots = 1;
 
 // Run an auction.
-$auction_result = $topsort_client->auction($slots, $products)->wait();
+$auction_result = $topsort_client->create_auction($slots, $products)->wait();
 
 // => [
 // "results" => [
