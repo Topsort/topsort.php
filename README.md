@@ -81,7 +81,7 @@ Tracks whenever a product, promoted or not, had a click.
 - placement: Optional. An array describing the placement of the product on the site.
 - id: Optional. The marketplace's ID for the event. If present, it should be unique. Topsort may use this field to de-duplicate events.
 - opaqueUserId: Optional. The marketplace's ID for the user. Defaults to a random UUID stored in a cookie.
-- ocurredAt: Optional. A DateTime, from when the click happened. Defaults to the current time.
+- occurredAt: Optional. A DateTime, from when the click happened. Defaults to the current time.
 
 ```php
 <?php
@@ -113,7 +113,7 @@ rendered on the site.
 - placement: Optional. An array describing the placement of the product on the site.
 - id: Optional. The marketplace's ID for the event. If present, it should be unique. Topsort may use this field to de-duplicate events.
 - opaqueUserId: Optional. The marketplace's ID for the user. Defaults to a random UUID stored in a cookie.
-- ocurredAt: Optional. A DateTime, from when the impression happened. Defaults to the current time.
+- occurredAt: Optional. A DateTime, from when the impression happened. Defaults to the current time.
 
 ```php
 <?php
@@ -140,7 +140,7 @@ $topsort_client->report_impression($impression);
 
 - items: An array of product data.
 - opaqueUserId: Optional. The marketplace's ID for the user. Defaults to a random UUID stored in a cookie.
-- ocurredAt: Optional. A DateTime, from when the purchase happened. Defaults to the current time.
+- occurredAt: Optional. A DateTime, from when the purchase happened. Defaults to the current time.
 
 ```php
 <?php
@@ -159,7 +159,7 @@ $items = [
 
 // Report the purchase
 $topsort_client->report_purchase([
-  "ocurredAt" => new DateTime(),
+  "occurredAt" => new DateTime(),
   "items" => $items,
 ]);
 ```

@@ -1,27 +1,31 @@
 {
-    "name": "topsort/sdk",
-    "description": "Library for communicating with Topsort",
-    "keywords": ["promoted", "ads", "marketplace"],
-    "license": "MIT",
-    "version": "3.0.0",
-    "authors": [
-        {
-            "name": "Pablo Reszczynski",
-            "email": "pablo@topsort.com"
-        }
-    ],
-    "type": "library",
-    "require": {
-        "php": ">=7.3",
-        "guzzlehttp/guzzle": "^7.3"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^9.6",
-        "vimeo/psalm": "^5.15"
-    },
-    "autoload": {
-        "psr-4": {
-            "Topsort\\": "src/"
-        }
+  "name": "topsort/sdk",
+  "description": "Library for communicating with Topsort",
+  "keywords": [
+    "promoted",
+    "ads",
+    "marketplace"
+  ],
+  "license": "MIT",
+  "version": "3.0.1",
+  "authors": [
+    {
+      "name": "Pablo Reszczynski",
+      "email": "pablo@topsort.com"
     }
+  ],
+  "type": "library",
+  "require": {
+    "php": ">=7.3",
+    "guzzlehttp/guzzle": "^7.3"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.6",
+    "vimeo/psalm": "^5.15"
+  },
+  "autoload": {
+    "psr-4": {
+      "Topsort\\": "src/"
+    }
+  }
 }
