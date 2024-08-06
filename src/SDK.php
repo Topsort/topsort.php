@@ -14,7 +14,7 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\TransferException;
 
-define("TOPSORT_SDK_VERSION", "v3.0.0");
+define("TOPSORT_SDK_VERSION", "v3.0.1");
 
 /**
 *  A sample class
@@ -30,10 +30,10 @@ class SDK
      * Types
      * @psalm-type Placement=array{path: string, position?: int, page?: int, pageSize?: int, productId?: string, categoryIds?: array<string>, searchQuery?: string}
      * @psalm-type Entity=array{type: string, id: string}
-     * @psalm-type Impression=array{placement: Placement, entity?: Entity, resolvedBidId?: string, id?: string, opaqueUserId?: string, ocurredAt?: \DateTime}
-     * @psalm-type Click=array{placement?: Placement, entity?: Entity, resolvedBidId?: string, id?: string, opaqueUserId?: string, ocurredAt?: \DateTime}
+     * @psalm-type Impression=array{placement: Placement, entity?: Entity, resolvedBidId?: string, id?: string, opaqueUserId?: string, occurredAt?: \DateTime}
+     * @psalm-type Click=array{placement?: Placement, entity?: Entity, resolvedBidId?: string, id?: string, opaqueUserId?: string, occurredAt?: \DateTime}
      * @psalm-type PurchaseItem=array{productId: string, quantity?: int, unitPrice: int}
-     * @psalm-type Purchase=array{ocurredAt?: \DateTime, id?: string, opaqueUserId?: string, items?: array<PurchaseItem>}
+     * @psalm-type Purchase=array{occurredAt?: \DateTime, id?: string, opaqueUserId?: string, items?: array<PurchaseItem>}
      * @psalm-type BannerOptions=array{slots: int, slotId: string, category?: string, searchQuery?: string, device?: string}
      */
 
@@ -139,8 +139,8 @@ class SDK
      */
     private function create_event(string $event_type, array $data)
     {
-        if (!isset($data["ocurredAt"])) {
-            $data["ocurredAt"] = new \DateTime();
+        if (!isset($data["occurredAt"])) {
+            $data["occurredAt"] = new \DateTime();
         }
         if (!isset($data["id"])) {
             $data["id"] = uniqid();
