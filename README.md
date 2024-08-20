@@ -1,6 +1,7 @@
-# Topsort Promoted Listings SDK for PHP
+# topsort.php
 
-A PHP Software Development Kit for Topsort Promoted Listings API.
+A PHP Software Development Kit for interacting with the `auctions` and `events`
+endpoints in the Topsort ecosystem.
 
 ## Installation
 
@@ -11,7 +12,7 @@ dependencies your project needs and installs them into your project.
 ```json
 {
   "require": {
-    "topsort/sdk": "3.0.0"
+    "topsort/sdk": "3.0.1"
   }
 }
 ```
@@ -22,7 +23,7 @@ composer require topsort/sdk
 ```
 
 ## How it works
-All operations are driven by our [OpenAPI documentation](https://docs.topsort.com/openapi/topsort-reference/),
+All operations are driven by our [OpenAPI documentation](https://docs.topsort.com/reference/integration-overview),
 so all methods maps directly to the API description.
 
 ## Usage: Running an auction
