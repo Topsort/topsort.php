@@ -53,8 +53,8 @@ class SDK
         'base_uri' => "https://api.topsort.com",
         'headers' => [
           'Authorization' => "Bearer {$api_key}",
-          'User-Agent' => "Topsort/PHP-SDK {TOPSORT_SDK_VERSION}",
-          'X-User-Agent' => "Topsort/PHP-SDK {TOPSORT_SDK_VERSION}"
+          'User-Agent' => "Topsort/PHP-SDK ".TOPSORT_SDK_VERSION,
+          'X-User-Agent' => "Topsort/PHP-SDK ".TOPSORT_SDK_VERSION
         ]
       ]);
     }
