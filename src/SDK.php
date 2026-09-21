@@ -32,6 +32,7 @@ class SDK
      * @psalm-type Entity=array{type: string, id: string}
      * @psalm-type Impression=array{placement: Placement, entity?: Entity, resolvedBidId?: string, id?: string, opaqueUserId?: string, occurredAt?: \DateTime}
      * @psalm-type Click=array{placement?: Placement, entity?: Entity, resolvedBidId?: string, id?: string, opaqueUserId?: string, occurredAt?: \DateTime}
+     * @psalm-type Render=array{resolvedBidId: string, placement?: Placement, id?: string, opaqueUserId?: string, occurredAt?: \DateTime}
      * @psalm-type PurchaseItem=array{productId: string, quantity?: int, unitPrice: int}
      * @psalm-type Purchase=array{occurredAt?: \DateTime, id?: string, opaqueUserId?: string, items?: array<PurchaseItem>}
      * @psalm-type BannerOptions=array{slots: int, slotId: string, category?: string, searchQuery?: string, device?: string}
@@ -129,12 +130,12 @@ class SDK
     }
 
     /**
-     * All events are described by a single JSON object, an ImpressionEvent, ClickEvent
-     * or PurchaseEvent. All event types have an eventType field and an id field.
+     * All events are described by a single JSON object, an ImpressionEvent, ClickEvent,
+     * PurchaseEvent or RenderEvent. All event types have an eventType field and an id field.
      * id is supplied by the marketplace.
      *
-     * @param 'impression'|'click'|'purchase' $event_type
-     * @param Impression|Click|Purchase $data
+     * @param 'impression'|'click'|'purchase'|'render' $event_type
+     * @param Impression|Click|Purchase|Render $data
      * @return PromiseInterface | null
      */
     private function create_event(string $event_type, array $data)
@@ -161,6 +162,10 @@ class SDK
           $payload = [
             'purchases' => [$data],
           ];
+        } else if (strtolower($event_type) === 'render') {
+          $payload = [
+            'renders' => [$data],
+          ];
         } else {
           throw new \Exception('Invalid event type: {$event_type}');
         }
@@ -179,6 +184,21 @@ class SDK
     public function report_click(array $data)
     {
         return $this->create_event('click', $data);
+    }
+
+    /**
+     * Renders are sponsored-only: unlike clicks and impressions, there is no organic
+     * `entity` fallback, so a render without a resolvedBidId has nothing to report.
+     *
+     * @param Render $data
+     * @return PromiseInterface | null
+     */
+    public function report_render(array $data)
+    {
+        if (empty($data['resolvedBidId'])) {
+            return null;
+        }
+        return $this->create_event('render', $data);
     }
 
     /**

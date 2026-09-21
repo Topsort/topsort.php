@@ -134,6 +134,38 @@ $impression = [
 $topsort_client->report_impression($impression);
 ```
 
+## Usage: Reporting render events
+Tracks whenever an auction winner was actually rendered on the site. Render events
+are sponsored-only: unlike clicks and impressions there is no organic `entity`
+fallback, so a render without a `resolvedBidId` is not reported.
+
+`Topsort\SDK\SDK::report_render` requires one argument, an array with the following keys:
+
+- resolvedBidId: Required. Must be the ID for the auction the product won.
+- placement: Optional. An array describing the placement of the product on the site.
+- id: Optional. The marketplace's ID for the event. If present, it should be unique. Topsort may use this field to de-duplicate events.
+- opaqueUserId: Optional. The marketplace's ID for the user. Defaults to a random UUID stored in a cookie.
+- occurredAt: Optional. A DateTime, from when the render happened. Defaults to the current time.
+
+```php
+<?php
+
+use Topsort\SDK;
+
+$topsort_client = new SDK('my_api_key');
+
+$placement = [
+  // A marketplace assigned name for a page.
+  "path" => "/categories/shoes",
+];
+
+// Report the render
+$topsort_client->report_render([
+  "placement" => $placement,
+  "resolvedBidId" => "AKFU78",
+]);
+```
+
 ## Usage: Reporting purchases events
 
 
