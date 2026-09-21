@@ -38,8 +38,7 @@ final class SDKRenderEventTest extends TestCase
         $requestHistory = [];
         $sdk = $this->makeSdkWithMockClient($requestHistory);
 
-        $sdk->report_render([
-            'resolvedBidId' => 'bid-123',
+        $sdk->report_render('bid-123', [
             'opaqueUserId' => 'user-456',
         ])->wait();
 
@@ -70,7 +69,7 @@ final class SDKRenderEventTest extends TestCase
         $requestHistory = [];
         $sdk = $this->makeSdkWithMockClient($requestHistory);
 
-        $sdk->report_render(['resolvedBidId' => 'bid-789'])->wait();
+        $sdk->report_render('bid-789')->wait();
 
         unset($_COOKIE['ts_opaque_user_id']);
 
@@ -83,30 +82,5 @@ final class SDKRenderEventTest extends TestCase
         $this->assertArrayHasKey('occurredAt', $render);
         $this->assertNotEmpty($render['occurredAt']);
         $this->assertSame('cookie-user-123', $render['opaqueUserId']);
-    }
-
-    /**
-     * @dataProvider missingResolvedBidIdProvider
-     */
-    public function testReportRenderSkipsWithoutResolvedBidId(array $data): void
-    {
-        $requestHistory = [];
-        $sdk = $this->makeSdkWithMockClient($requestHistory);
-
-        $result = $sdk->report_render($data);
-
-        $this->assertNull($result);
-        $this->assertCount(0, $requestHistory);
-    }
-
-    /**
-     * @return array<string, array{0: array<string, mixed>}>
-     */
-    public function missingResolvedBidIdProvider(): array
-    {
-        return [
-            'no resolvedBidId key' => [['opaqueUserId' => 'user-456']],
-            'empty resolvedBidId' => [['resolvedBidId' => '', 'opaqueUserId' => 'user-456']],
-        ];
     }
 }
