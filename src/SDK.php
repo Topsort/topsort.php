@@ -33,6 +33,7 @@ class SDK
      * @psalm-type Impression=array{placement: Placement, entity?: Entity, resolvedBidId?: string, id?: string, opaqueUserId?: string, occurredAt?: \DateTime}
      * @psalm-type Click=array{placement?: Placement, entity?: Entity, resolvedBidId?: string, id?: string, opaqueUserId?: string, occurredAt?: \DateTime}
      * @psalm-type Render=array{resolvedBidId: string, placement?: Placement, id?: string, opaqueUserId?: string, occurredAt?: \DateTime}
+     * @psalm-type RenderOptions=array{placement?: Placement, id?: string, opaqueUserId?: string, occurredAt?: \DateTime}
      * @psalm-type PurchaseItem=array{productId: string, quantity?: int, unitPrice: int}
      * @psalm-type Purchase=array{occurredAt?: \DateTime, id?: string, opaqueUserId?: string, items?: array<PurchaseItem>}
      * @psalm-type BannerOptions=array{slots: int, slotId: string, category?: string, searchQuery?: string, device?: string}
@@ -188,16 +189,15 @@ class SDK
 
     /**
      * Renders are sponsored-only: unlike clicks and impressions, there is no organic
-     * `entity` fallback, so a render without a resolvedBidId has nothing to report.
+     * `entity` fallback, so resolvedBidId is required.
      *
-     * @param Render $data
+     * @param string $resolvedBidId
+     * @param RenderOptions $data
      * @return PromiseInterface | null
      */
-    public function report_render(array $data)
+    public function report_render(string $resolvedBidId, array $data = [])
     {
-        if (empty($data['resolvedBidId'])) {
-            return null;
-        }
+        $data['resolvedBidId'] = $resolvedBidId;
         return $this->create_event('render', $data);
     }
 
