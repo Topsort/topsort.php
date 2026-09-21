@@ -14,7 +14,7 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\TransferException;
 
-define("TOPSORT_SDK_VERSION", "v3.0.1");
+define("TOPSORT_SDK_VERSION", "v3.1.0");
 
 /**
 *  A sample class
