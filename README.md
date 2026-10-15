@@ -12,7 +12,7 @@ dependencies your project needs and installs them into your project.
 ```json
 {
   "require": {
-    "topsort/sdk": "3.0.1"
+    "topsort/sdk": "3.1.0"
   }
 }
 ```
@@ -27,11 +27,13 @@ All operations are driven by our [OpenAPI documentation](https://docs.topsort.co
 so all methods maps directly to the API description.
 
 ## Usage: Running an auction
-`Topsort\SDK\SDK::auction` requires three arguments:
+`Topsort\SDK::create_auction` runs a sponsored listings auction and returns a promise. It takes:
 
-- slots: An array describing the product slots that are being auctioned.
-- products: An array, with the id's of the participating products.
-- session: An array, describing the user on the current session.
+- slots: Required. An integer, the number of winners to return.
+- products: Optional. An array with the IDs of the participating products.
+- qualityScores: Optional. An array of floats, one per product, in the same order.
+- category: Optional. A category ID, used when no products are given.
+- searchQuery: Optional. A search query, used when no products or category are given.
 
 
 ```php
@@ -63,7 +65,7 @@ $auction_result = $topsort_client->create_auction($slots, $products)->wait();
 //            "rank" => 1,
 //            "type" => "product",
 //            "id" => "gDG0HV97ed2s",
-//            "resovedBidId" => "AKFU78"
+//            "resolvedBidId" => "AKFU78"
 //         ]
 //      ]
 //    ]
@@ -75,9 +77,9 @@ $auction_result = $topsort_client->create_auction($slots, $products)->wait();
 ## Usage: Reporting click events
 Tracks whenever a product, promoted or not, had a click.
 
-`Topsort\SDK\SDK::report_click` requires one argument, an array with the following keys:
+`Topsort\SDK::report_click` requires one argument, an array with the following keys:
 
-- entity: Required for unpromoted products. Must be the ID for the product that was clicked.
+- entity: Required for unpromoted products. An array with the `type` (e.g. `"product"`) and `id` of the product that was clicked.
 - resolvedBidId: Required for promoted products. Must be the ID for the auction the product won.
 - placement: Optional. An array describing the placement of the product on the site.
 - id: Optional. The marketplace's ID for the event. If present, it should be unique. Topsort may use this field to de-duplicate events.
@@ -104,12 +106,12 @@ $topsort_client->report_click([
 ```
 
 ## Usage: Reporting impression events
-Tracks the product impressions on the site, and if any auction winners were
-rendered on the site.
+Tracks when a product, promoted or not, becomes visible on the site. To record
+that an auction winner was inserted into the page, use render events instead.
 
-`Topsort\SDK\SDK::report_impressions` requires one argument, an array with the following keys:
+`Topsort\SDK::report_impressions` requires one argument, an array with the following keys:
 
-- entity: Required for unpromoted products. Must be the ID for the product that was rendered.
+- entity: Required for unpromoted products. An array with the `type` (e.g. `"product"`) and `id` of the product that was seen.
 - resolvedBidId: Required for promoted products. Must be the ID for the auction the product won.
 - placement: Optional. An array describing the placement of the product on the site.
 - id: Optional. The marketplace's ID for the event. If present, it should be unique. Topsort may use this field to de-duplicate events.
@@ -121,7 +123,7 @@ rendered on the site.
 
 use Topsort\SDK;
 
-$topsort_client = new SDK('my_marketplace', 'my_api_key');
+$topsort_client = new SDK('my_api_key');
 
 $impression = [
   "placement" => [
@@ -131,7 +133,7 @@ $impression = [
 ];
 
 // Report the impressions
-$topsort_client->report_impression($impression);
+$topsort_client->report_impressions($impression);
 ```
 
 ## Usage: Reporting render events
@@ -139,7 +141,7 @@ Tracks whenever an auction winner was actually rendered on the site. Render even
 are sponsored-only: unlike clicks and impressions there is no organic `entity`
 fallback, so `resolvedBidId` is required.
 
-`Topsort\SDK\SDK::report_render` requires a `resolvedBidId` argument, the ID for the
+`Topsort\SDK::report_render` requires a `resolvedBidId` argument, the ID for the
 auction the product won, plus an optional array with the following keys:
 
 - placement: Optional. An array describing the placement of the product on the site.
@@ -168,7 +170,7 @@ $topsort_client->report_render("AKFU78", [
 ## Usage: Reporting purchases events
 
 
-`Topsort\SDK\SDK::report_purchase` requires one argument, an array with the following keys:
+`Topsort\SDK::report_purchase` requires one argument, an array with the following keys:
 
 - items: An array of product data.
 - opaqueUserId: Optional. The marketplace's ID for the user. Defaults to a random UUID stored in a cookie.
