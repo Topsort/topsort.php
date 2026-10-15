@@ -74,6 +74,14 @@ $auction_result = $topsort_client->create_auction($slots, $products)->wait();
 ```
 
 
+## Usage: Sending events
+The event methods (`report_click`, `report_impressions`, `report_render` and
+`report_purchase`) return a promise, and nothing is sent until you call
+`->wait()` on it. `wait()` blocks until Topsort responds and throws
+`Topsort\TopsortException` on an API or connection error, so catch it. Where
+possible, report events after the response has been sent to the shopper, for
+example after `fastcgi_finish_request()`.
+
 ## Usage: Reporting click events
 Tracks whenever a product, promoted or not, had a click.
 
@@ -90,6 +98,7 @@ Tracks whenever a product, promoted or not, had a click.
 <?php
 
 use Topsort\SDK;
+use Topsort\TopsortException;
 
 $topsort_client = new SDK('my_api_key');
 
@@ -99,10 +108,14 @@ $placement = [
 ];
 
 // Report the click
-$topsort_client->report_click([
-  "placement" => $placement,
-  "resolvedBidId" => "AKFU78",
-]);
+try {
+  $topsort_client->report_click([
+    "placement" => $placement,
+    "resolvedBidId" => "AKFU78",
+  ])->wait();
+} catch (TopsortException $e) {
+  error_log($e->getMessage());
+}
 ```
 
 ## Usage: Reporting impression events
@@ -122,6 +135,7 @@ that an auction winner was inserted into the page, use render events instead.
 <?php
 
 use Topsort\SDK;
+use Topsort\TopsortException;
 
 $topsort_client = new SDK('my_api_key');
 
@@ -133,7 +147,11 @@ $impression = [
 ];
 
 // Report the impressions
-$topsort_client->report_impressions($impression);
+try {
+  $topsort_client->report_impressions($impression)->wait();
+} catch (TopsortException $e) {
+  error_log($e->getMessage());
+}
 ```
 
 ## Usage: Reporting render events
@@ -153,6 +171,7 @@ auction the product won, plus an optional array with the following keys:
 <?php
 
 use Topsort\SDK;
+use Topsort\TopsortException;
 
 $topsort_client = new SDK('my_api_key');
 
@@ -162,9 +181,13 @@ $placement = [
 ];
 
 // Report the render
-$topsort_client->report_render("AKFU78", [
-  "placement" => $placement,
-]);
+try {
+  $topsort_client->report_render("AKFU78", [
+    "placement" => $placement,
+  ])->wait();
+} catch (TopsortException $e) {
+  error_log($e->getMessage());
+}
 ```
 
 ## Usage: Reporting purchases events
@@ -180,6 +203,7 @@ $topsort_client->report_render("AKFU78", [
 <?php
 
 use Topsort\SDK;
+use Topsort\TopsortException;
 
 $topsort_client = new SDK('my_api_key');
 
@@ -192,8 +216,12 @@ $items = [
 ];
 
 // Report the purchase
-$topsort_client->report_purchase([
-  "occurredAt" => new DateTime(),
-  "items" => $items,
-]);
+try {
+  $topsort_client->report_purchase([
+    "occurredAt" => new DateTime(),
+    "items" => $items,
+  ])->wait();
+} catch (TopsortException $e) {
+  error_log($e->getMessage());
+}
 ```
