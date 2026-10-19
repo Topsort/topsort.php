@@ -4,13 +4,18 @@ namespace Topsort;
 
 use PHPUnit\Framework\TestCase;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 
 final class SDKErrorMessageTest extends TestCase
 {
-    private function makeSdkWithMockResponse(Response $response): SDK
+    /**
+     * @param Response|\Throwable $response
+     */
+    private function makeSdkWithMockResponse($response): SDK
     {
         $client = new Client([
             'base_uri' => 'https://api.topsort.com',
@@ -47,5 +52,29 @@ final class SDKErrorMessageTest extends TestCase
         $this->expectExceptionMessage('Invalid event type: pageview');
 
         $createEvent->invoke($sdk, 'pageview', ['opaqueUserId' => 'user-456']);
+    }
+
+    public function testEmptyErrorBodyFallsBackToTheGuzzleMessage(): void
+    {
+        $sdk = $this->makeSdkWithMockResponse(new Response(500));
+
+        try {
+            $sdk->report_click(['resolvedBidId' => 'bid-123', 'opaqueUserId' => 'user-456'])->wait();
+            $this->fail('Expected TopsortException');
+        } catch (TopsortException $e) {
+            $this->assertStringStartsWith('Event creation failed: Message:', $e->getMessage());
+            $this->assertStringContainsString('500 Internal Server Error', $e->getMessage());
+        }
+    }
+
+    public function testConnectionErrorNamesTheUrl(): void
+    {
+        $request = new Request('POST', 'https://api.topsort.com/v2/events');
+        $sdk = $this->makeSdkWithMockResponse(new ConnectException('timed out', $request));
+
+        $this->expectException(TopsortException::class);
+        $this->expectExceptionMessage('Event creation failed: Could not connect to https://api.topsort.com/v2/events');
+
+        $sdk->report_click(['resolvedBidId' => 'bid-123', 'opaqueUserId' => 'user-456'])->wait();
     }
 }
