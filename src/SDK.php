@@ -32,8 +32,8 @@ class SDK
      * @psalm-type Entity=array{type: string, id: string}
      * @psalm-type Impression=array{placement: Placement, entity?: Entity, resolvedBidId?: string, id?: string, opaqueUserId: string, occurredAt?: \DateTime}
      * @psalm-type Click=array{placement?: Placement, entity?: Entity, resolvedBidId?: string, id?: string, opaqueUserId: string, occurredAt?: \DateTime}
-     * @psalm-type Render=array{resolvedBidId: string, placement?: Placement, id?: string, opaqueUserId: string, occurredAt?: \DateTime}
-     * @psalm-type RenderOptions=array{placement?: Placement, id?: string, opaqueUserId: string, occurredAt?: \DateTime}
+     * @psalm-type Render=array{resolvedBidId: string, placement?: Placement, id?: string, opaqueUserId?: string, occurredAt?: \DateTime}
+     * @psalm-type RenderOptions=array{placement?: Placement, id?: string, opaqueUserId?: string, occurredAt?: \DateTime}
      * @psalm-type PurchaseItem=array{productId: string, quantity?: int, unitPrice: int}
      * @psalm-type Purchase=array{occurredAt?: \DateTime, id?: string, opaqueUserId: string, items?: array<PurchaseItem>}
      * @psalm-type BannerOptions=array{slots: int, slotId: string, category?: string, searchQuery?: string, device?: string}
@@ -138,6 +138,7 @@ class SDK
      * @param 'impression'|'click'|'purchase'|'render' $event_type
      * @param Impression|Click|Purchase|Render $data
      * @return PromiseInterface | null
+     * @throws InvalidEventException when opaqueUserId is missing, before any request is sent
      */
     private function create_event(string $event_type, array $data)
     {
@@ -149,9 +150,9 @@ class SDK
         }
         // The SDK cannot mint a stable user id server-side: a cookie set here is lost once
         // output has started, and does not exist in CLI or background jobs.
-        if (!isset($data["opaqueUserId"]) || $data["opaqueUserId"] === '') {
-            throw new \InvalidArgumentException(
-                "opaqueUserId is required: pass the same long-lived user id sent on auction requests"
+        if (!isset($data["opaqueUserId"]) || !is_string($data["opaqueUserId"]) || trim($data["opaqueUserId"]) === '') {
+            throw new InvalidEventException(
+                "opaqueUserId is required: pass a non-empty string that identifies the user across sessions"
             );
         }
 
@@ -185,6 +186,7 @@ class SDK
     /**
      * @param Click $data
      * @return PromiseInterface | null
+     * @throws InvalidEventException when opaqueUserId is missing, before any request is sent
      */
     public function report_click(array $data)
     {
@@ -198,8 +200,9 @@ class SDK
      * @param string $resolvedBidId
      * @param RenderOptions $data
      * @return PromiseInterface | null
+     * @throws InvalidEventException when opaqueUserId is missing, before any request is sent
      */
-    public function report_render(string $resolvedBidId, array $data)
+    public function report_render(string $resolvedBidId, array $data = [])
     {
         $data['resolvedBidId'] = $resolvedBidId;
         return $this->create_event('render', $data);
@@ -208,6 +211,7 @@ class SDK
     /**
      * @param Impression $data
      * @return PromiseInterface | null
+     * @throws InvalidEventException when opaqueUserId is missing, before any request is sent
      */
     public function report_impressions(array $data)
     {
@@ -217,6 +221,7 @@ class SDK
     /**
      * @param Purchase $data
      * @return PromiseInterface | null
+     * @throws InvalidEventException when opaqueUserId is missing, before any request is sent
      */
     public function report_purchase(array $data)
     {
@@ -276,4 +281,11 @@ class TopsortException extends \Exception
         $previous_message = $previous ? $previous->getMessage() : '';
         return __CLASS__ . " {$this->message}: {$previous_message}";
     }
+}
+
+/**
+ * Thrown synchronously by the report_* methods when an event is invalid, before any request is sent.
+ */
+class InvalidEventException extends TopsortException
+{
 }

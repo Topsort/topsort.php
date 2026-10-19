@@ -11,13 +11,18 @@ use GuzzleHttp\Psr7\Response;
 
 final class SDKOpaqueUserIdTest extends TestCase
 {
+    /** @var MockHandler */
+    private $mock;
+
     private function makeSdkWithMockClient(array &$requestHistory): SDK
     {
-        $mock = new MockHandler([
+        // The handler shifts a response off this queue as soon as a request is dispatched,
+        // even if the promise is never waited on, so its count shows whether anything was sent.
+        $this->mock = new MockHandler([
             new Response(204),
         ]);
         $history = Middleware::history($requestHistory);
-        $stack = HandlerStack::create($mock);
+        $stack = HandlerStack::create($this->mock);
         $stack->push($history);
 
         $client = new Client([
@@ -36,7 +41,7 @@ final class SDKOpaqueUserIdTest extends TestCase
     /**
      * @return array<string, array{callable(SDK, array): mixed, array}>
      */
-    public function eventProvider(): array
+    private static function events(): array
     {
         $placement = ['path' => '/categories/shoes'];
         return [
@@ -48,33 +53,66 @@ final class SDKOpaqueUserIdTest extends TestCase
     }
 
     /**
-     * @dataProvider eventProvider
+     * @return array<string, array{callable(SDK, array): mixed, array}>
      */
-    public function testMissingOpaqueUserIdThrowsWithoutSending(callable $report, array $data): void
+    public function eventProvider(): array
+    {
+        return self::events();
+    }
+
+    /**
+     * @return array<string, array{callable(SDK, array): mixed, array}>
+     */
+    public function invalidOpaqueUserIdProvider(): array
+    {
+        $invalid = [
+            'missing' => [],
+            'null' => ['opaqueUserId' => null],
+            'empty' => ['opaqueUserId' => ''],
+            'blank' => ['opaqueUserId' => '   '],
+            'int' => ['opaqueUserId' => 12345],
+            'false' => ['opaqueUserId' => false],
+            'array' => ['opaqueUserId' => ['user-123']],
+        ];
+        $cases = [];
+        foreach (self::events() as $event => [$report, $data]) {
+            foreach ($invalid as $name => $extra) {
+                $cases["$event, $name"] = [$report, $extra + $data];
+            }
+        }
+        return $cases;
+    }
+
+    /**
+     * @dataProvider invalidOpaqueUserIdProvider
+     */
+    public function testInvalidOpaqueUserIdThrowsWithoutSending(callable $report, array $data): void
     {
         $requestHistory = [];
         $sdk = $this->makeSdkWithMockClient($requestHistory);
 
         try {
             $report($sdk, $data);
-            $this->fail('Expected InvalidArgumentException');
-        } catch (\InvalidArgumentException $e) {
+            $this->fail('Expected InvalidEventException');
+        } catch (InvalidEventException $e) {
             $this->assertStringContainsString('opaqueUserId', $e->getMessage());
         }
-        $this->assertCount(0, $requestHistory);
-        $this->assertArrayNotHasKey('ts_opaque_user_id', $_COOKIE);
+        $this->assertCount(1, $this->mock, 'no request should have been dispatched');
     }
 
-    /**
-     * @dataProvider eventProvider
-     */
-    public function testEmptyOpaqueUserIdThrows(callable $report, array $data): void
+    public function testRenderWithoutOptionsThrowsInvalidEventException(): void
     {
         $requestHistory = [];
         $sdk = $this->makeSdkWithMockClient($requestHistory);
 
-        $this->expectException(\InvalidArgumentException::class);
-        $report($sdk, $data + ['opaqueUserId' => '']);
+        $this->expectException(InvalidEventException::class);
+        $sdk->report_render('bid-1');
+    }
+
+    public function testInvalidEventExceptionIsATopsortException(): void
+    {
+        // Callers following the README catch TopsortException around report_*()->wait().
+        $this->assertInstanceOf(TopsortException::class, new InvalidEventException('x'));
     }
 
     /**
@@ -87,6 +125,7 @@ final class SDKOpaqueUserIdTest extends TestCase
 
         $report($sdk, $data + ['opaqueUserId' => 'user-123'])->wait();
 
+        $this->assertCount(0, $this->mock);
         $body = json_decode((string) $requestHistory[0]['request']->getBody(), true);
         $event = array_values($body)[0][0];
         $this->assertSame('user-123', $event['opaqueUserId']);

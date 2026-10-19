@@ -83,7 +83,7 @@ Tracks whenever a product, promoted or not, had a click.
 - resolvedBidId: Required for promoted products. Must be the ID for the auction the product won.
 - placement: Optional. An array describing the placement of the product on the site.
 - id: Optional. The marketplace's ID for the event. If present, it should be unique. Topsort may use this field to de-duplicate events.
-- opaqueUserId: Required. The marketplace's anonymized ID for the user. It must be the same long-lived ID sent on auction requests, or purchases cannot be attributed. See the [opaqueUserId guidance](https://docs.topsort.com/en/api-reference/events/report-events) for how to generate and store it. The SDK throws an `InvalidArgumentException` when it is missing.
+- opaqueUserId: Required. The marketplace's anonymized ID for the user. It must stay the same across the user's sessions, or purchases cannot be attributed. See the [opaqueUserId guidance](https://docs.topsort.com/en/api-reference/events/report-events) for how to generate and store it. The SDK throws a `Topsort\InvalidEventException` (a `TopsortException`) when it is missing or not a non-empty string.
 - occurredAt: Optional. A DateTime, from when the click happened. Defaults to the current time.
 
 ```php
@@ -116,7 +116,7 @@ that an auction winner was inserted into the page, use render events instead.
 - resolvedBidId: Required for promoted products. Must be the ID for the auction the product won.
 - placement: Optional. An array describing the placement of the product on the site.
 - id: Optional. The marketplace's ID for the event. If present, it should be unique. Topsort may use this field to de-duplicate events.
-- opaqueUserId: Required. The marketplace's anonymized ID for the user. It must be the same long-lived ID sent on auction requests, or purchases cannot be attributed. See the [opaqueUserId guidance](https://docs.topsort.com/en/api-reference/events/report-events) for how to generate and store it. The SDK throws an `InvalidArgumentException` when it is missing.
+- opaqueUserId: Required. The marketplace's anonymized ID for the user. It must stay the same across the user's sessions, or purchases cannot be attributed. See the [opaqueUserId guidance](https://docs.topsort.com/en/api-reference/events/report-events) for how to generate and store it. The SDK throws a `Topsort\InvalidEventException` (a `TopsortException`) when it is missing or not a non-empty string.
 - occurredAt: Optional. A DateTime, from when the impression happened. Defaults to the current time.
 
 ```php
@@ -148,7 +148,7 @@ auction the product won, plus an array with the following keys:
 
 - placement: Optional. An array describing the placement of the product on the site.
 - id: Optional. The marketplace's ID for the event. If present, it should be unique. Topsort may use this field to de-duplicate events.
-- opaqueUserId: Required. The marketplace's anonymized ID for the user. It must be the same long-lived ID sent on auction requests, or purchases cannot be attributed. See the [opaqueUserId guidance](https://docs.topsort.com/en/api-reference/events/report-events) for how to generate and store it. The SDK throws an `InvalidArgumentException` when it is missing.
+- opaqueUserId: Required. The marketplace's anonymized ID for the user. It must stay the same across the user's sessions, or purchases cannot be attributed. See the [opaqueUserId guidance](https://docs.topsort.com/en/api-reference/events/report-events) for how to generate and store it. The SDK throws a `Topsort\InvalidEventException` (a `TopsortException`) when it is missing or not a non-empty string.
 - occurredAt: Optional. A DateTime, from when the render happened. Defaults to the current time.
 
 ```php
@@ -176,7 +176,7 @@ $topsort_client->report_render("AKFU78", [
 `Topsort\SDK::report_purchase` requires one argument, an array with the following keys:
 
 - items: An array of product data.
-- opaqueUserId: Required. The marketplace's anonymized ID for the user. It must be the same long-lived ID sent on auction requests, or purchases cannot be attributed. See the [opaqueUserId guidance](https://docs.topsort.com/en/api-reference/events/report-events) for how to generate and store it. The SDK throws an `InvalidArgumentException` when it is missing.
+- opaqueUserId: Required. The marketplace's anonymized ID for the user. It must stay the same across the user's sessions, or purchases cannot be attributed. See the [opaqueUserId guidance](https://docs.topsort.com/en/api-reference/events/report-events) for how to generate and store it. The SDK throws a `Topsort\InvalidEventException` (a `TopsortException`) when it is missing or not a non-empty string.
 - occurredAt: Optional. A DateTime, from when the purchase happened. Defaults to the current time.
 
 ```php
