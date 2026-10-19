@@ -12,7 +12,7 @@ dependencies your project needs and installs them into your project.
 ```json
 {
   "require": {
-    "topsort/sdk": "3.1.0"
+    "topsort/sdk": "^3.1"
   }
 }
 ```
@@ -91,7 +91,7 @@ Tracks whenever a product, promoted or not, had a click.
 - resolvedBidId: Required for promoted products. Must be the ID for the auction the product won.
 - placement: Optional. An array describing the placement of the product on the site.
 - id: Optional. The marketplace's ID for the event. If present, it should be unique. Topsort may use this field to de-duplicate events.
-- opaqueUserId: Optional. The marketplace's ID for the user. Defaults to a random UUID stored in a cookie.
+- opaqueUserId: Optional, but strongly recommended. The marketplace's anonymized ID for the user. It must stay the same across the user's sessions, or purchases cannot be attributed. See the [opaqueUserId guidance](https://docs.topsort.com/en/api-reference/events/report-events) for how to generate and store it. When it is missing, the SDK falls back to a temporary ID kept in a cookie, which changes when the cookie cannot be set (for example after output has started, or in CLI jobs).
 - occurredAt: Optional. A DateTime, from when the click happened. Defaults to the current time.
 
 ```php
@@ -112,6 +112,7 @@ try {
   $topsort_client->report_click([
     "placement" => $placement,
     "resolvedBidId" => "AKFU78",
+    "opaqueUserId" => "u_7f3a9c",
   ])->wait();
 } catch (TopsortException $e) {
   error_log($e->getMessage());
@@ -128,7 +129,7 @@ that an auction winner was inserted into the page, use render events instead.
 - resolvedBidId: Required for promoted products. Must be the ID for the auction the product won.
 - placement: Optional. An array describing the placement of the product on the site.
 - id: Optional. The marketplace's ID for the event. If present, it should be unique. Topsort may use this field to de-duplicate events.
-- opaqueUserId: Optional. The marketplace's ID for the user. Defaults to a random UUID stored in a cookie.
+- opaqueUserId: Optional, but strongly recommended. The marketplace's anonymized ID for the user. It must stay the same across the user's sessions, or purchases cannot be attributed. See the [opaqueUserId guidance](https://docs.topsort.com/en/api-reference/events/report-events) for how to generate and store it. When it is missing, the SDK falls back to a temporary ID kept in a cookie, which changes when the cookie cannot be set (for example after output has started, or in CLI jobs).
 - occurredAt: Optional. A DateTime, from when the impression happened. Defaults to the current time.
 
 ```php
@@ -144,6 +145,7 @@ $impression = [
     "path" => "/categories/shoes",
   ],
   "resolvedBidId" => "AKFU78",
+  "opaqueUserId" => "u_7f3a9c",
 ];
 
 // Report the impressions
@@ -164,7 +166,7 @@ auction the product won, plus an optional array with the following keys:
 
 - placement: Optional. An array describing the placement of the product on the site.
 - id: Optional. The marketplace's ID for the event. If present, it should be unique. Topsort may use this field to de-duplicate events.
-- opaqueUserId: Optional. The marketplace's ID for the user. Defaults to a random UUID stored in a cookie.
+- opaqueUserId: Optional, but strongly recommended. The marketplace's anonymized ID for the user. It must stay the same across the user's sessions, or purchases cannot be attributed. See the [opaqueUserId guidance](https://docs.topsort.com/en/api-reference/events/report-events) for how to generate and store it. When it is missing, the SDK falls back to a temporary ID kept in a cookie, which changes when the cookie cannot be set (for example after output has started, or in CLI jobs).
 - occurredAt: Optional. A DateTime, from when the render happened. Defaults to the current time.
 
 ```php
@@ -184,6 +186,7 @@ $placement = [
 try {
   $topsort_client->report_render("AKFU78", [
     "placement" => $placement,
+    "opaqueUserId" => "u_7f3a9c",
   ])->wait();
 } catch (TopsortException $e) {
   error_log($e->getMessage());
@@ -196,7 +199,7 @@ try {
 `Topsort\SDK::report_purchase` requires one argument, an array with the following keys:
 
 - items: An array of product data.
-- opaqueUserId: Optional. The marketplace's ID for the user. Defaults to a random UUID stored in a cookie.
+- opaqueUserId: Optional, but strongly recommended. The marketplace's anonymized ID for the user. It must stay the same across the user's sessions, or purchases cannot be attributed. See the [opaqueUserId guidance](https://docs.topsort.com/en/api-reference/events/report-events) for how to generate and store it. When it is missing, the SDK falls back to a temporary ID kept in a cookie, which changes when the cookie cannot be set (for example after output has started, or in CLI jobs).
 - occurredAt: Optional. A DateTime, from when the purchase happened. Defaults to the current time.
 
 ```php
@@ -219,6 +222,7 @@ $items = [
 try {
   $topsort_client->report_purchase([
     "occurredAt" => new DateTime(),
+    "opaqueUserId" => "u_7f3a9c",
     "items" => $items,
   ])->wait();
 } catch (TopsortException $e) {
