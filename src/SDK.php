@@ -73,7 +73,7 @@ class SDK
      * @param string $searchQuery
      * @return PromiseInterface
      */
-    public function create_auction($slots, array $products = null, array $qualityScores = null, $category = null, $searchQuery = null)
+    public function create_auction($slots, ?array $products = null, ?array $qualityScores = null, $category = null, $searchQuery = null)
     {
         $auction = [
           "type" => "listings",
@@ -272,7 +272,7 @@ class TopsortException extends \Exception
      * @param int $code
      * @param \Throwable $previous
      */
-    public function __construct(string $message, int $code=0, \Throwable $previous=null)
+    public function __construct(string $message, int $code=0, ?\Throwable $previous=null)
     {
         parent::__construct($message, $code, $previous);
     }
