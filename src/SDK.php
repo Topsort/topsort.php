@@ -36,7 +36,7 @@ class SDK
      * @psalm-type RenderOptions=array{placement?: Placement, id?: string, opaqueUserId?: string, occurredAt?: \DateTime}
      * @psalm-type PurchaseItem=array{productId: string, quantity?: int, unitPrice: int}
      * @psalm-type Purchase=array{occurredAt?: \DateTime, id?: string, opaqueUserId: string, items?: array<PurchaseItem>}
-     * @psalm-type BannerOptions=array{slots: int, slotId: string, category?: string, searchQuery?: string, device?: string}
+     * @psalm-type BannerOptions=array{slots: int, slotId: string, category?: string, searchQuery?: string, device?: string, opaqueUserId?: string}
      */
 
     /** @var string */
@@ -71,14 +71,18 @@ class SDK
      * @param array<float> $qualityScores
      * @param string $category
      * @param string $searchQuery
+     * @param string|null $opaqueUserId The same user ID sent on events, so purchases can be attributed.
      * @return PromiseInterface
      */
-    public function create_auction($slots, array $products = null, array $qualityScores = null, $category = null, $searchQuery = null)
+    public function create_auction($slots, ?array $products = null, ?array $qualityScores = null, $category = null, $searchQuery = null, ?string $opaqueUserId = null)
     {
         $auction = [
           "type" => "listings",
           "slots" => $slots,
         ];
+        if ($opaqueUserId !== null) {
+          $auction["opaqueUserId"] = $opaqueUserId;
+        }
         if ($products) {
             $auction["products"] = [
             "ids" => $products,
