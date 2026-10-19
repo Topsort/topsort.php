@@ -61,17 +61,10 @@ final class SDKRenderEventTest extends TestCase
 
     public function testReportRenderFillsDefaults(): void
     {
-        // getOpaqueUserId() falls back to setcookie() when $_COOKIE isn't set, which fails
-        // under the CLI SAPI once PHPUnit has already produced output. Seeding the cookie
-        // takes the same short-circuit the SDK uses for a returning visitor.
-        $_COOKIE['ts_opaque_user_id'] = 'cookie-user-123';
-
         $requestHistory = [];
         $sdk = $this->makeSdkWithMockClient($requestHistory);
 
-        $sdk->report_render('bid-789')->wait();
-
-        unset($_COOKIE['ts_opaque_user_id']);
+        $sdk->report_render('bid-789', ['opaqueUserId' => 'user-123'])->wait();
 
         $request = $requestHistory[0]['request'];
         $body = json_decode((string) $request->getBody(), true);
@@ -81,6 +74,6 @@ final class SDKRenderEventTest extends TestCase
         $this->assertNotEmpty($render['id']);
         $this->assertArrayHasKey('occurredAt', $render);
         $this->assertNotEmpty($render['occurredAt']);
-        $this->assertSame('cookie-user-123', $render['opaqueUserId']);
+        $this->assertSame('user-123', $render['opaqueUserId']);
     }
 }

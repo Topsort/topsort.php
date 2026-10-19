@@ -30,12 +30,12 @@ class SDK
      * Types
      * @psalm-type Placement=array{path: string, position?: int, page?: int, pageSize?: int, productId?: string, categoryIds?: array<string>, searchQuery?: string}
      * @psalm-type Entity=array{type: string, id: string}
-     * @psalm-type Impression=array{placement: Placement, entity?: Entity, resolvedBidId?: string, id?: string, opaqueUserId?: string, occurredAt?: \DateTime}
-     * @psalm-type Click=array{placement?: Placement, entity?: Entity, resolvedBidId?: string, id?: string, opaqueUserId?: string, occurredAt?: \DateTime}
-     * @psalm-type Render=array{resolvedBidId: string, placement?: Placement, id?: string, opaqueUserId?: string, occurredAt?: \DateTime}
-     * @psalm-type RenderOptions=array{placement?: Placement, id?: string, opaqueUserId?: string, occurredAt?: \DateTime}
+     * @psalm-type Impression=array{placement: Placement, entity?: Entity, resolvedBidId?: string, id?: string, opaqueUserId: string, occurredAt?: \DateTime}
+     * @psalm-type Click=array{placement?: Placement, entity?: Entity, resolvedBidId?: string, id?: string, opaqueUserId: string, occurredAt?: \DateTime}
+     * @psalm-type Render=array{resolvedBidId: string, placement?: Placement, id?: string, opaqueUserId: string, occurredAt?: \DateTime}
+     * @psalm-type RenderOptions=array{placement?: Placement, id?: string, opaqueUserId: string, occurredAt?: \DateTime}
      * @psalm-type PurchaseItem=array{productId: string, quantity?: int, unitPrice: int}
-     * @psalm-type Purchase=array{occurredAt?: \DateTime, id?: string, opaqueUserId?: string, items?: array<PurchaseItem>}
+     * @psalm-type Purchase=array{occurredAt?: \DateTime, id?: string, opaqueUserId: string, items?: array<PurchaseItem>}
      * @psalm-type BannerOptions=array{slots: int, slotId: string, category?: string, searchQuery?: string, device?: string}
      */
 
@@ -147,8 +147,12 @@ class SDK
         if (!isset($data["id"])) {
             $data["id"] = uniqid();
         }
-        if (!isset($data["opaqueUserId"])) {
-            $data["opaqueUserId"] = $this->getOpaqueUserId();
+        // The SDK cannot mint a stable user id server-side: a cookie set here is lost once
+        // output has started, and does not exist in CLI or background jobs.
+        if (!isset($data["opaqueUserId"]) || $data["opaqueUserId"] === '') {
+            throw new \InvalidArgumentException(
+                "opaqueUserId is required: pass the same long-lived user id sent on auction requests"
+            );
         }
 
         if (strtolower($event_type) === 'impression') {
@@ -195,7 +199,7 @@ class SDK
      * @param RenderOptions $data
      * @return PromiseInterface | null
      */
-    public function report_render(string $resolvedBidId, array $data = [])
+    public function report_render(string $resolvedBidId, array $data)
     {
         $data['resolvedBidId'] = $resolvedBidId;
         return $this->create_event('render', $data);
@@ -248,20 +252,6 @@ class SDK
                 throw new TopsortException($message . ": Could not connect to " . $url, 0, $err);
             }
         };
-    }
-
-    /**
-     * @return string
-     */
-    private function getOpaqueUserId()
-    {
-      if (isset($_COOKIE["ts_opaque_user_id"])) {
-        return $_COOKIE["ts_opaque_user_id"];
-      } else {
-        $opaque_user_id = uniqid();
-        setcookie("ts_opaque_user_id", $opaque_user_id, time() + (86400 * 30), "/");
-        return $opaque_user_id;
-      }
     }
 }
 
