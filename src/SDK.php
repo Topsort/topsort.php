@@ -67,8 +67,8 @@ class SDK
      * list or rendering them in a special location on the page.
      *
      * @param int $slots
-     * @param array<string> $products
-     * @param array<float> $qualityScores
+     * @param array<string>|null $products
+     * @param array<float>|null $qualityScores
      * @param string $category
      * @param string $searchQuery
      * @return PromiseInterface
@@ -270,7 +270,7 @@ class TopsortException extends \Exception
     /**
      * @param string $message
      * @param int $code
-     * @param \Throwable $previous
+     * @param \Throwable|null $previous
      */
     public function __construct(string $message, int $code=0, ?\Throwable $previous=null)
     {
