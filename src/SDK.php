@@ -144,6 +144,10 @@ class SDK
         if (!isset($data["occurredAt"])) {
             $data["occurredAt"] = new \DateTime();
         }
+        // json_encode turns a DateTime into an object; the API expects an RFC 3339 string.
+        if ($data["occurredAt"] instanceof \DateTimeInterface) {
+            $data["occurredAt"] = $data["occurredAt"]->format(\DateTimeInterface::RFC3339_EXTENDED);
+        }
         if (!isset($data["id"])) {
             $data["id"] = uniqid();
         }
