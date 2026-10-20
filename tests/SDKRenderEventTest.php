@@ -73,7 +73,25 @@ final class SDKRenderEventTest extends TestCase
         $this->assertArrayHasKey('id', $render);
         $this->assertNotEmpty($render['id']);
         $this->assertArrayHasKey('occurredAt', $render);
-        $this->assertNotEmpty($render['occurredAt']);
-        $this->assertSame('user-123', $render['opaqueUserId']);
+        $this->assertIsString($render['occurredAt']);
+        $this->assertNotFalse(
+            \DateTime::createFromFormat(\DateTimeInterface::RFC3339_EXTENDED, $render['occurredAt'])
+        );
+        $this->assertSame('cookie-user-123', $render['opaqueUserId']);
+    }
+
+    public function testReportRenderSerializesProvidedOccurredAt(): void
+    {
+        $requestHistory = [];
+        $sdk = $this->makeSdkWithMockClient($requestHistory);
+
+        $sdk->report_render('bid-123', [
+            'opaqueUserId' => 'user-456',
+            'occurredAt' => new \DateTime('2026-10-19T12:00:00.250Z'),
+        ])->wait();
+
+        $body = json_decode((string) $requestHistory[0]['request']->getBody(), true);
+
+        $this->assertSame('2026-10-19T12:00:00.250+00:00', $body['renders'][0]['occurredAt']);
     }
 }

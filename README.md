@@ -12,7 +12,7 @@ dependencies your project needs and installs them into your project.
 ```json
 {
   "require": {
-    "topsort/sdk": "3.1.0"
+    "topsort/sdk": "^3.1"
   }
 }
 ```

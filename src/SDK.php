@@ -14,7 +14,7 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\TransferException;
 
-define("TOPSORT_SDK_VERSION", "v3.1.0");
+define("TOPSORT_SDK_VERSION", "v3.1.1");
 
 /**
 *  A sample class
@@ -67,8 +67,8 @@ class SDK
      * list or rendering them in a special location on the page.
      *
      * @param int $slots
-     * @param array<string> $products
-     * @param array<float> $qualityScores
+     * @param array<string>|null $products
+     * @param array<float>|null $qualityScores
      * @param string $category
      * @param string $searchQuery
      * @param string|null $opaqueUserId The same user ID sent on events, so purchases can be attributed.
@@ -149,6 +149,10 @@ class SDK
         if (!isset($data["occurredAt"])) {
             $data["occurredAt"] = new \DateTime();
         }
+        // json_encode turns a DateTime into an object; the API expects an RFC 3339 string.
+        if ($data["occurredAt"] instanceof \DateTimeInterface) {
+            $data["occurredAt"] = $data["occurredAt"]->format(\DateTimeInterface::RFC3339_EXTENDED);
+        }
         if (!isset($data["id"])) {
             $data["id"] = uniqid();
         }
@@ -177,7 +181,7 @@ class SDK
             'renders' => [$data],
           ];
         } else {
-          throw new \Exception('Invalid event type: {$event_type}');
+          throw new \Exception("Invalid event type: {$event_type}");
         }
         return $this->client->requestAsync('POST', '/v2/events', [
          'json' => $payload
@@ -251,7 +255,7 @@ class SDK
         return function (TransferException $err) use ($message) {
             if ($err instanceof RequestException) {
                 $error_response = $err->getResponse();
-                $error_response_content = $error_response && $error_response->getBody()->getContents();
+                $error_response_content = $error_response ? (string) $error_response->getBody() : '';
                 $error_message = ($error_response_content && $error_response_content != '')
             ? 'Content: ' . $error_response_content
             : 'Message:' . $err->getMessage();
@@ -269,9 +273,9 @@ class TopsortException extends \Exception
     /**
      * @param string $message
      * @param int $code
-     * @param \Throwable $previous
+     * @param \Throwable|null $previous
      */
-    public function __construct(string $message, int $code=0, \Throwable $previous=null)
+    public function __construct(string $message, int $code=0, ?\Throwable $previous=null)
     {
         parent::__construct($message, $code, $previous);
     }
