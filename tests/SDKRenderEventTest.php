@@ -77,7 +77,7 @@ final class SDKRenderEventTest extends TestCase
         $this->assertNotFalse(
             \DateTime::createFromFormat(\DateTimeInterface::RFC3339_EXTENDED, $render['occurredAt'])
         );
-        $this->assertSame('cookie-user-123', $render['opaqueUserId']);
+        $this->assertSame('user-123', $render['opaqueUserId']);
     }
 
     public function testReportRenderSerializesProvidedOccurredAt(): void
