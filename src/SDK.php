@@ -172,7 +172,7 @@ class SDK
             'renders' => [$data],
           ];
         } else {
-          throw new \Exception('Invalid event type: {$event_type}');
+          throw new \Exception("Invalid event type: {$event_type}");
         }
         return $this->client->requestAsync('POST', '/v2/events', [
          'json' => $payload
@@ -242,7 +242,7 @@ class SDK
         return function (TransferException $err) use ($message) {
             if ($err instanceof RequestException) {
                 $error_response = $err->getResponse();
-                $error_response_content = $error_response && $error_response->getBody()->getContents();
+                $error_response_content = $error_response ? (string) $error_response->getBody() : '';
                 $error_message = ($error_response_content && $error_response_content != '')
             ? 'Content: ' . $error_response_content
             : 'Message:' . $err->getMessage();
