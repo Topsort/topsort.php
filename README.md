@@ -88,13 +88,19 @@ $auction_result = $topsort_client->create_auction($slots, $products, null, null,
 - device: Optional. `"desktop"` (default) or `"mobile"`.
 - opaqueUserId: Optional. The same ID you send on events.
 
+`wait()` throws `Topsort\TopsortException` on an API or connection error, and the call itself throws an `\InvalidArgumentException` when the array cannot be JSON encoded.
+
 ```php
-$banner_result = $topsort_client->create_banner_auction([
-  "slots" => 1,
-  "slotId" => "home-banner",
-  "category" => ["id" => "c_shoes"],
-  "opaqueUserId" => "u_7f3a9c",
-])->wait();
+try {
+  $banner_result = $topsort_client->create_banner_auction([
+    "slots" => 1,
+    "slotId" => "home-banner",
+    "category" => ["id" => "c_shoes"],
+    "opaqueUserId" => "u_7f3a9c",
+  ])->wait();
+} catch (\Topsort\TopsortException | \InvalidArgumentException $e) {
+  error_log($e->getMessage());
+}
 ```
 
 
@@ -239,7 +245,7 @@ try {
 
 `Topsort\SDK::report_purchase` requires one argument, an array with the following keys:
 
-- items: Required. An array of items, each with `productId`, `unitPrice` (the price of one unit in your currency's major units with decimals, for example `12.95`, not cents), an optional `quantity` (defaults to 1) and an optional `vendorId`.
+- items: Required. An array of items, each with `productId`, `unitPrice` (the price of one unit, an int or a float, sent as given), an optional `quantity` (defaults to 1) and an optional `vendorId`.
 - id: Optional. The marketplace's ID for the purchase, for example the order ID. Pass your own so a retried purchase keeps the same ID; otherwise the SDK generates a new one on every call.
 - opaqueUserId: Required. The marketplace's anonymized ID for the user. It must stay the same across the user's sessions and match the ID passed to `create_auction`, or purchases cannot be attributed. See the [opaqueUserId guidance](https://docs.topsort.com/en/api-reference/events/report-events) for how to generate and store it. The SDK throws a `Topsort\InvalidEventException` (a `TopsortException`) when it is missing or not a non-empty string.
 - occurredAt: Optional. A DateTime, from when the purchase happened. Defaults to the current time.
