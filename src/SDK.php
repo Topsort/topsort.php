@@ -34,9 +34,9 @@ class SDK
      * @psalm-type Click=array{placement?: Placement, entity?: Entity, resolvedBidId?: string, id?: string, opaqueUserId: string, occurredAt?: \DateTime}
      * @psalm-type Render=array{resolvedBidId: string, placement?: Placement, id?: string, opaqueUserId?: string, occurredAt?: \DateTime}
      * @psalm-type RenderOptions=array{placement?: Placement, id?: string, opaqueUserId?: string, occurredAt?: \DateTime}
-     * @psalm-type PurchaseItem=array{productId: string, quantity?: int, unitPrice: int}
+     * @psalm-type PurchaseItem=array{productId: string, quantity?: int, unitPrice: float|int, vendorId?: string}
      * @psalm-type Purchase=array{occurredAt?: \DateTime, id?: string, opaqueUserId: string, items?: array<PurchaseItem>}
-     * @psalm-type BannerOptions=array{slots: int, slotId: string, category?: string, searchQuery?: string, device?: string, opaqueUserId?: string}
+     * @psalm-type BannerOptions=array{slots: int, slotId: string, category?: array{id: string}|array{ids: array<string>}, searchQuery?: string, device?: string, opaqueUserId?: string}
      */
 
     /** @var string */
